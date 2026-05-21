@@ -70,6 +70,7 @@
                 <span id="sellUsd">$0.00</span>
                 <button type="button" id="maxAmount">MAX</button>
               </div>
+              <p class="balance-note" id="sellBalance">Balance shown for selected source chain.</p>
             </section>
 
             <button type="button" id="swapChains" class="switcher" title="Switch direction">v</button>
@@ -96,9 +97,14 @@
                 <span id="buyUsd">$0.00</span>
                 <span id="routeLabel">Base Sepolia -> Ritual Testnet</span>
               </div>
+              <p class="balance-note" id="buyBalance">Destination balance is separate from source chain balance.</p>
             </section>
 
             <div class="route-details">
+              <div>
+                <span>Status</span>
+                <strong id="routeStatus">Coming soon</strong>
+              </div>
               <div>
                 <span>Route</span>
                 <strong id="routeDetail">LayerZero OFT + Ritual verifier</strong>

@@ -44,9 +44,12 @@ const buyWallet = document.querySelector("#buyWallet");
 const sellUsd = document.querySelector("#sellUsd");
 const buyUsd = document.querySelector("#buyUsd");
 const routeLabel = document.querySelector("#routeLabel");
+const routeStatus = document.querySelector("#routeStatus");
 const routeDetail = document.querySelector("#routeDetail");
 const feeLabel = document.querySelector("#feeLabel");
 const routeDetails = document.querySelector(".route-details");
+const sellBalance = document.querySelector("#sellBalance");
+const buyBalance = document.querySelector("#buyBalance");
 const fromChainLabel = document.querySelector("#fromChainLabel");
 const toChainLabel = document.querySelector("#toChainLabel");
 const sellToken = document.querySelector("#sellToken");
@@ -66,6 +69,39 @@ let account = "";
 let fromKey = "base";
 let toKey = "ritual";
 let selectingSide = "from";
+
+const ROUTES = {
+  "base:sepolia": {
+    available: true,
+    label: "LayerZero OFT test route",
+    fee: "~0.002 ETH",
+  },
+  "sepolia:base": {
+    available: true,
+    label: "LayerZero OFT test route",
+    fee: "~0.002 ETH",
+  },
+  "base:ritual": {
+    available: false,
+    label: "Ritual testnet route coming soon",
+    fee: "Pending",
+  },
+  "ritual:base": {
+    available: false,
+    label: "Ritual testnet route coming soon",
+    fee: "Pending",
+  },
+  "sepolia:ritual": {
+    available: false,
+    label: "Ritual testnet route coming soon",
+    fee: "Pending",
+  },
+  "ritual:sepolia": {
+    available: false,
+    label: "Ritual testnet route coming soon",
+    fee: "Pending",
+  },
+};
 
 function shortAddress(value) {
   if (!value || value.length < 12) return value || "";
@@ -91,21 +127,33 @@ function updateQuote() {
   const amount = Number(amountInput.value || 0);
   const from = NETWORKS[fromKey];
   const to = NETWORKS[toKey];
+  const route = ROUTES[`${fromKey}:${toKey}`] || {
+    available: false,
+    label: "Route not configured",
+    fee: "Unavailable",
+  };
   const rate = fromKey === "base" && toKey === "ritual" ? 1000 : 0.001;
-  const receive = amount > 0 ? amount * rate : 0;
+  const receive = amount > 0 && route.available ? amount * rate : 0;
 
   receiveInput.value = receive ? receive.toFixed(receive >= 1 ? 4 : 6) : "0";
   sellUsd.textContent = money(amount * 3000);
   buyUsd.textContent = money(receive * 0.003);
   routeLabel.textContent = `${from.label} -> ${to.label}`;
-  routeDetail.textContent = toKey === "ritual" ? "LayerZero route + Ritual testnet settlement" : "LayerZero OFT route";
-  feeLabel.textContent = fromKey === "ritual" ? "~0.01 RITUAL" : "~0.002 ETH";
+  routeStatus.textContent = route.available ? "Available" : "Coming soon";
+  routeStatus.className = route.available ? "available" : "soon";
+  routeDetail.textContent = route.label;
+  feeLabel.textContent = route.fee;
+  sellBalance.textContent = account
+    ? `Balance is read on ${from.label}. Same wallet can have different balance on each chain.`
+    : `Connect wallet to read ${from.label} balance.`;
+  buyBalance.textContent = `Destination balance lives on ${to.label}, separate from ${from.label}.`;
 
   fromChainLabel.textContent = from.short;
   toChainLabel.textContent = to.short;
   setTokenButton(sellToken, from, fromKey === "ritual" ? "ritual" : "eth");
   setTokenButton(buyToken, to, toKey === "ritual" ? "ritual" : "eth");
-  bridgeButton.textContent = account ? `Bridge from ${from.short}` : "Connect Wallet";
+  bridgeButton.textContent = account ? (route.available ? `Bridge from ${from.short}` : "Coming Soon") : "Connect Wallet";
+  bridgeButton.disabled = Boolean(account && !route.available);
 }
 
 function walletChainParams(network) {
@@ -268,6 +316,20 @@ form.addEventListener("submit", async (event) => {
     ritualChainId: 1979,
   };
   const requestHash = await digestRequest(request);
+  const route = ROUTES[`${fromKey}:${toKey}`];
+
+  if (!route || !route.available) {
+    txCard.innerHTML = `
+      <dl>
+        <dt>Status</dt><dd>Coming soon</dd>
+        <dt>Route</dt><dd>${request.from} -> ${request.to}</dd>
+        <dt>Reason</dt><dd>This route needs bridge contracts, liquidity, or a relayer before it can execute.</dd>
+        <dt>Wallet</dt><dd>${shortAddress(account)}</dd>
+        <dt>Request</dt><dd>${requestHash}</dd>
+      </dl>
+    `;
+    return;
+  }
 
   txCard.innerHTML = `
     <dl>

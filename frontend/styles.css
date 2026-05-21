@@ -299,6 +299,13 @@ kbd {
   font-size: 14px;
 }
 
+.balance-note {
+  margin: -6px 0 0;
+  color: #98a2b3;
+  font-size: 12px;
+  line-height: 1.35;
+}
+
 .asset-foot button {
   border: 0;
   border-radius: 999px;
@@ -352,6 +359,14 @@ kbd {
   text-align: right;
 }
 
+#routeStatus.available {
+  color: var(--green);
+}
+
+#routeStatus.soon {
+  color: var(--purple);
+}
+
 .primary {
   width: 100%;
   min-height: 44px;
@@ -363,6 +378,12 @@ kbd {
   font-weight: 950;
   font-style: italic;
   letter-spacing: 0;
+}
+
+.primary:disabled {
+  cursor: not-allowed;
+  background: #d0d5dd;
+  color: #667085;
 }
 
 .activity-card {
