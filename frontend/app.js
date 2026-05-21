@@ -5,7 +5,10 @@ const NETWORKS = {
     token: "ETH",
     coin: "E",
     chainId: 84532,
+    hexChainId: "0x14a34",
     eid: 40245,
+    rpcUrls: ["https://sepolia.base.org"],
+    explorerUrls: ["https://sepolia.basescan.org"],
   },
   ritual: {
     label: "Ritual Testnet",
@@ -13,7 +16,10 @@ const NETWORKS = {
     token: "RITUAL",
     coin: "R",
     chainId: 1979,
+    hexChainId: "0x7bb",
     eid: null,
+    rpcUrls: ["https://rpc.ritualfoundation.org"],
+    explorerUrls: ["https://explorer.ritualfoundation.org"],
   },
   sepolia: {
     label: "Ethereum Sepolia",
@@ -21,20 +27,11 @@ const NETWORKS = {
     token: "ETH",
     coin: "E",
     chainId: 11155111,
+    hexChainId: "0xaa36a7",
     eid: 40161,
+    rpcUrls: ["https://sepolia.drpc.org"],
+    explorerUrls: ["https://sepolia.etherscan.io"],
   },
-};
-
-const RITUAL_CHAIN = {
-  chainId: "0x7bb",
-  chainName: "Ritual Testnet",
-  nativeCurrency: {
-    name: "RITUAL",
-    symbol: "RITUAL",
-    decimals: 18,
-  },
-  rpcUrls: ["https://rpc.ritualfoundation.org"],
-  blockExplorerUrls: ["https://explorer.ritualfoundation.org"],
 };
 
 const connectButton = document.querySelector("#connect");
@@ -99,6 +96,42 @@ function updateQuote() {
   toChainLabel.textContent = to.short;
   setTokenButton(sellToken, from, fromKey === "ritual" ? "ritual" : "eth");
   setTokenButton(buyToken, to, toKey === "ritual" ? "ritual" : "eth");
+  bridgeButton.textContent = account ? `Bridge from ${from.short}` : "Connect Wallet";
+}
+
+function walletChainParams(network) {
+  return {
+    chainId: network.hexChainId,
+    chainName: network.label,
+    nativeCurrency: {
+      name: network.token,
+      symbol: network.token,
+      decimals: 18,
+    },
+    rpcUrls: network.rpcUrls,
+    blockExplorerUrls: network.explorerUrls,
+  };
+}
+
+async function switchToNetwork(key) {
+  if (!window.ethereum) return;
+  const network = NETWORKS[key];
+
+  try {
+    await window.ethereum.request({
+      method: "wallet_switchEthereumChain",
+      params: [{ chainId: network.hexChainId }],
+    });
+  } catch (error) {
+    if (error && error.code === 4902) {
+      await window.ethereum.request({
+        method: "wallet_addEthereumChain",
+        params: [walletChainParams(network)],
+      });
+      return;
+    }
+    throw error;
+  }
 }
 
 async function connect() {
@@ -110,19 +143,14 @@ async function connect() {
 
   const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
   account = accounts[0] || "";
+  await switchToNetwork(fromKey);
+
   const label = shortAddress(account);
 
   connectButton.textContent = label || "Connect";
-  bridgeButton.textContent = "Preview Bridge";
   sellWallet.textContent = label || "Select wallet";
   buyWallet.textContent = label || "Select wallet";
-
-  if (toKey === "ritual" || fromKey === "ritual") {
-    await window.ethereum.request({
-      method: "wallet_addEthereumChain",
-      params: [RITUAL_CHAIN],
-    });
-  }
+  updateQuote();
 }
 
 async function digestRequest(payload) {
@@ -136,6 +164,7 @@ swapButton.addEventListener("click", () => {
   toKey = fromKey;
   fromKey = nextFrom;
   updateQuote();
+  if (account) switchToNetwork(fromKey);
 });
 
 maxButton.addEventListener("click", () => {
@@ -156,6 +185,8 @@ form.addEventListener("submit", async (event) => {
     await connect();
     return;
   }
+
+  await switchToNetwork(fromKey);
 
   const request = {
     from: NETWORKS[fromKey].label,
