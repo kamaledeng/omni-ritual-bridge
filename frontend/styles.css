@@ -162,12 +162,8 @@ button {
 .brand-mark {
   width: 30px;
   height: 30px;
-  border-radius: 50%;
-  background:
-    linear-gradient(var(--purple), var(--purple)) center/30px 3px no-repeat,
-    linear-gradient(90deg, transparent 45%, var(--purple) 45% 55%, transparent 55%) center/30px 30px no-repeat,
-    linear-gradient(45deg, transparent 43%, var(--purple) 43% 55%, transparent 55%) center/30px 30px no-repeat,
-    linear-gradient(-45deg, transparent 43%, var(--purple) 43% 55%, transparent 55%) center/30px 30px no-repeat;
+  border-radius: 6px;
+  background-color: #111111;
 }
 
 .nav-links {
@@ -413,7 +409,7 @@ kbd {
 }
 
 .coin.ritual {
-  background: linear-gradient(145deg, #6f3cff, #5417d7);
+  background-color: #111111;
 }
 
 .coin.orit {
@@ -444,6 +440,22 @@ kbd {
 
 .coin.arb {
   background: #213147;
+}
+
+.ritual-logo {
+  background-image: url("./assets/ritual-logo.png");
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 78%;
+}
+
+.brand-mark.ritual-logo {
+  background-size: 82%;
+}
+
+body.dark .brand-mark.ritual-logo,
+body.dark .coin.ritual.ritual-logo {
+  background-color: #0f1117;
 }
 
 .asset-foot {

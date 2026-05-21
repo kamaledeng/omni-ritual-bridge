@@ -289,7 +289,7 @@ function tokenLogo(symbol, fallback) {
   const key = symbol.toLowerCase();
   return {
     eth: { text: "ETH", className: "eth" },
-    ritual: { text: "RIT", className: "ritual" },
+    ritual: { text: "", className: "ritual ritual-logo" },
     orit: { text: "OR", className: "orit" },
     usdc: { text: "$", className: "usdc" },
     pol: { text: "POL", className: "polygon" },
@@ -299,6 +299,13 @@ function tokenLogo(symbol, fallback) {
 }
 
 function chainLogo(network) {
+  if (network.logo === "ritual") {
+    return {
+      text: "",
+      className: "ritual ritual-logo",
+    };
+  }
+
   return {
     text: network.coin,
     className: network.logo || "eth",
