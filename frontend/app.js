@@ -163,11 +163,13 @@ const buyPresetButtons = [...document.querySelectorAll("[data-buy-usd]")];
 const allChainsButton = document.querySelector('[data-chain="all"]');
 
 let account = "";
+let solanaAccount = "";
 let fromKey = "base";
 let toKey = "ritual";
 let selectingSide = "from";
 let selectedChainFilter = "all";
 let selectedProvider = null;
+let selectedWalletType = "evm";
 const announcedProviders = [];
 let mode = "swap";
 let sourceBalance = 0;
@@ -225,6 +227,10 @@ function shortAddress(value) {
   return `${value.slice(0, 6)}...${value.slice(-4)}`;
 }
 
+function activeAddress() {
+  return selectedWalletType === "solana" ? solanaAccount : account;
+}
+
 function money(value) {
   return `$${Number(value || 0).toFixed(2)}`;
 }
@@ -257,8 +263,9 @@ async function rpcBalance(network, address) {
 async function updateBalances() {
   const from = NETWORKS[fromKey];
   const to = NETWORKS[toKey];
+  const walletAddress = activeAddress();
 
-  if (!account) {
+  if (!walletAddress) {
     sellBalance.textContent = `Connect wallet to read ${from.label} balance.`;
     buyBalance.textContent = `Connect wallet to read ${to.label} balance.`;
     return;
@@ -268,8 +275,8 @@ async function updateBalances() {
   buyBalance.textContent = `Loading ${to.short} balance...`;
 
   const [fromResult, toResult] = await Promise.allSettled([
-    rpcBalance(from, account),
-    rpcBalance(to, account),
+    rpcBalance(from, walletAddress),
+    rpcBalance(to, walletAddress),
   ]);
 
   if (fromResult.status === "fulfilled") {
@@ -338,7 +345,7 @@ function providerName(provider) {
   return "Injected Wallet";
 }
 
-function providers() {
+function evmProviders() {
   const list = [];
   list.push(...announcedProviders.map((entry) => entry.provider));
   if (window.ethereum?.providers) list.push(...window.ethereum.providers);
@@ -346,12 +353,22 @@ function providers() {
   return [...new Map(list.map((provider) => [providerName(provider), provider])).values()];
 }
 
+function solanaProviders() {
+  const list = [];
+  if (window.phantom?.solana) list.push({ name: "Phantom", provider: window.phantom.solana });
+  if (window.solana && !list.some((entry) => entry.provider === window.solana)) {
+    list.push({ name: window.solana.isPhantom ? "Phantom" : "Solana Wallet", provider: window.solana });
+  }
+  return list;
+}
+
 function renderWallets() {
-  const detected = providers();
+  const detected = evmProviders();
+  const solanaDetected = solanaProviders();
   walletList.innerHTML = "";
 
-  if (!detected.length) {
-    walletList.innerHTML = `<p class="balance-note">No injected wallet found. Install MetaMask, Rabby, Coinbase Wallet, or another EVM wallet.</p>`;
+  if (!detected.length && !solanaDetected.length) {
+    walletList.innerHTML = `<p class="balance-note">No wallet found. Install MetaMask/Rabby for EVM or Phantom for Solana.</p>`;
     return;
   }
 
@@ -363,7 +380,19 @@ function renderWallets() {
       <span class="coin ritual">W</span>
       <span><strong>${providerName(provider)}</strong><small>Connect EVM wallet</small></span>
     `;
-    button.addEventListener("click", () => connect(provider));
+    button.addEventListener("click", () => connectEvm(provider));
+    walletList.appendChild(button);
+  });
+
+  solanaDetected.forEach(({ name, provider }) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "wallet-option";
+    button.innerHTML = `
+      <span class="coin sol">SOL</span>
+      <span><strong>${name}</strong><small>Connect Solana wallet</small></span>
+    `;
+    button.addEventListener("click", () => connectSolana(provider));
     walletList.appendChild(button);
   });
 }
@@ -460,7 +489,7 @@ function renderRoutes() {
       amountInput.value = "0";
       updateQuote();
       closeRoutesPicker();
-      if (account) switchToNetwork(fromKey);
+      if (activeAddress() && !NETWORKS[fromKey].nonEvm) switchToNetwork(fromKey);
     });
     routeList.appendChild(item);
   });
@@ -519,8 +548,8 @@ function updateQuote() {
   setTokenButton(sellToken, from);
   setTokenButton(buyToken, to);
   setTokenButton(buyModeToken, to);
-  bridgeButton.textContent = account ? (route.available ? `Bridge from ${from.short}` : "Coming Soon") : "Connect Wallet";
-  bridgeButton.disabled = Boolean(account && !route.available);
+  bridgeButton.textContent = activeAddress() ? (route.available ? `Bridge from ${from.short}` : "Coming Soon") : "Connect Wallet";
+  bridgeButton.disabled = Boolean(activeAddress() && !route.available);
   updateBalances();
 }
 
@@ -561,7 +590,7 @@ async function switchToNetwork(key) {
   }
 }
 
-async function connect(provider = selectedProvider || window.ethereum) {
+async function connectEvm(provider = selectedProvider || window.ethereum) {
   if (!provider) {
     connectButton.textContent = "No wallet";
     bridgeButton.textContent = "No Wallet Found";
@@ -570,6 +599,7 @@ async function connect(provider = selectedProvider || window.ethereum) {
   }
 
   selectedProvider = provider;
+  selectedWalletType = "evm";
   const accounts = await provider.request({ method: "eth_requestAccounts" });
   account = accounts[0] || "";
   await switchToNetwork(fromKey);
@@ -581,6 +611,32 @@ async function connect(provider = selectedProvider || window.ethereum) {
   buyWallet.textContent = label || "Select wallet";
   buyRecipient.textContent = label || "Select wallet";
   closeWalletPicker();
+  updateQuote();
+}
+
+async function connectSolana(provider = window.phantom?.solana || window.solana) {
+  if (!provider) {
+    openWalletModal();
+    return;
+  }
+
+  const response = await provider.connect();
+  solanaAccount = response.publicKey.toString();
+  selectedProvider = provider;
+  selectedWalletType = "solana";
+
+  const label = shortAddress(solanaAccount);
+  connectButton.textContent = label || "Connect";
+  sellWallet.textContent = label || "Select wallet";
+  buyWallet.textContent = label || "Select wallet";
+  buyRecipient.textContent = label || "Select wallet";
+  closeWalletPicker();
+
+  if (fromKey !== "solana" && toKey !== "solana") {
+    fromKey = "solana";
+    toKey = "ritual";
+  }
+
   updateQuote();
 }
 
@@ -610,7 +666,7 @@ swapButton.addEventListener("click", () => {
   fromKey = nextFrom;
   amountInput.value = "0";
   updateQuote();
-  if (account) switchToNetwork(fromKey);
+  if (activeAddress() && !NETWORKS[fromKey].nonEvm) switchToNetwork(fromKey);
 });
 
 sellToken.addEventListener("click", () => openTokenModal("from"));
@@ -653,7 +709,7 @@ trendButtons.forEach((button) => {
     toKey = to;
     amountInput.value = "0";
     updateQuote();
-    if (account) switchToNetwork(fromKey);
+    if (activeAddress() && !NETWORKS[fromKey].nonEvm) switchToNetwork(fromKey);
   });
 });
 swapTab.addEventListener("click", () => {
@@ -716,18 +772,18 @@ window.dispatchEvent(new Event("eip6963:requestProvider"));
 amountInput.addEventListener("input", updateQuote);
 connectButton.addEventListener("click", openWalletModal);
 bridgeButton.addEventListener("click", () => {
-  if (!account) openWalletModal();
+  if (!activeAddress()) openWalletModal();
 });
 
 form.addEventListener("submit", async (event) => {
   event.preventDefault();
 
-  if (!account) {
-    await connect();
+  if (!activeAddress()) {
+    openWalletModal();
     return;
   }
 
-  await switchToNetwork(fromKey);
+  if (!NETWORKS[fromKey].nonEvm) await switchToNetwork(fromKey);
 
   const request = {
     from: NETWORKS[fromKey].label,
@@ -736,7 +792,7 @@ form.addEventListener("submit", async (event) => {
     buyToken: NETWORKS[toKey].token,
     amount: amountInput.value,
     receive: receiveInput.value,
-    wallet: account,
+    wallet: activeAddress(),
     ritualChainId: 1979,
   };
   const requestHash = await digestRequest(request);
@@ -748,7 +804,7 @@ form.addEventListener("submit", async (event) => {
         <dt>Status</dt><dd>Coming soon</dd>
         <dt>Route</dt><dd>${request.from} -> ${request.to}</dd>
         <dt>Reason</dt><dd>This route needs bridge contracts, liquidity, or a relayer before it can execute.</dd>
-        <dt>Wallet</dt><dd>${shortAddress(account)}</dd>
+        <dt>Wallet</dt><dd>${shortAddress(activeAddress())}</dd>
         <dt>Request</dt><dd>${requestHash}</dd>
       </dl>
     `;
@@ -761,7 +817,7 @@ form.addEventListener("submit", async (event) => {
       <dt>Route</dt><dd>${request.from} -> ${request.to}</dd>
       <dt>Sell</dt><dd>${request.amount} ${request.sellToken}</dd>
       <dt>Buy</dt><dd>${request.receive} ${request.buyToken}</dd>
-      <dt>Wallet</dt><dd>${shortAddress(account)}</dd>
+      <dt>Wallet</dt><dd>${shortAddress(activeAddress())}</dd>
       <dt>Ritual</dt><dd>Testnet chain ID 1979</dd>
       <dt>Request</dt><dd>${requestHash}</dd>
     </dl>

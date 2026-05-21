@@ -399,14 +399,22 @@ kbd {
   font-weight: 950;
   font-size: 11px;
   letter-spacing: 0;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 74%;
 }
 
 .coin.eth {
-  background: linear-gradient(145deg, #627eea, #3f5fd4);
+  background-color: #eef2ff;
+  background-image: url("https://cryptologos.cc/logos/ethereum-eth-logo.png");
+  color: transparent;
 }
 
 .coin.base {
-  background: #0052ff;
+  background-color: #0052ff;
+  background-image: url("https://icons.llamao.fi/icons/chains/rsz_base.jpg");
+  background-size: cover;
+  color: transparent;
 }
 
 .coin.ritual {
@@ -418,29 +426,40 @@ kbd {
 }
 
 .coin.usdc {
-  background: #2775ca;
+  background-color: #ffffff;
+  background-image: url("https://cryptologos.cc/logos/usd-coin-usdc-logo.png");
   font-size: 18px;
+  color: transparent;
 }
 
 .coin.bnb {
-  background: #f3ba2f;
-  color: #111827;
+  background-color: #f3ba2f;
+  background-image: url("https://cryptologos.cc/logos/bnb-bnb-logo.png");
+  color: transparent;
 }
 
 .coin.sol {
-  background: linear-gradient(145deg, #14f195, #9945ff 52%, #00c2ff);
+  background-color: #111111;
+  background-image: url("https://cryptologos.cc/logos/solana-sol-logo.png");
+  color: transparent;
 }
 
 .coin.polygon {
-  background: #8247e5;
+  background-color: #ffffff;
+  background-image: url("https://cryptologos.cc/logos/polygon-matic-logo.png");
+  color: transparent;
 }
 
 .coin.op {
-  background: #ff0420;
+  background-color: #ff0420;
+  color: #ffffff;
 }
 
 .coin.arb {
-  background: #213147;
+  background-color: #213147;
+  background-image: url("https://icons.llamao.fi/icons/chains/rsz_arbitrum.jpg");
+  background-size: cover;
+  color: transparent;
 }
 
 .ritual-logo {
