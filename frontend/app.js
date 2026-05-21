@@ -36,6 +36,7 @@ const NETWORKS = {
 
 const connectButton = document.querySelector("#connect");
 const bridgeButton = document.querySelector("#bridgeButton");
+const themeToggle = document.querySelector("#themeToggle");
 const form = document.querySelector("#bridge-form");
 const amountInput = document.querySelector("#amount");
 const receiveInput = document.querySelector("#receiveAmount");
@@ -55,20 +56,23 @@ const toChainLabel = document.querySelector("#toChainLabel");
 const sellToken = document.querySelector("#sellToken");
 const buyToken = document.querySelector("#buyToken");
 const swapButton = document.querySelector("#swapChains");
-const maxButton = document.querySelector("#maxAmount");
 const txCard = document.querySelector("#tx-card");
 const buyTab = document.querySelector("#buyTab");
+const swapTab = document.querySelector("#swapTab");
 const settingsButton = document.querySelector("#settingsButton");
 const networkModal = document.querySelector("#networkModal");
 const modalTitle = document.querySelector("#modalTitle");
 const closeModal = document.querySelector("#closeModal");
 const networkOptions = [...document.querySelectorAll(".network-option")];
 const trendButtons = [...document.querySelectorAll("[data-route]")];
+const quickAmountButtons = [...document.querySelectorAll("[data-percent]")];
 
 let account = "";
 let fromKey = "base";
 let toKey = "ritual";
 let selectingSide = "from";
+let mode = "swap";
+let sourceBalance = 0;
 
 const ROUTES = {
   "base:sepolia": {
@@ -154,10 +158,13 @@ async function updateBalances() {
     rpcBalance(to, account),
   ]);
 
-  sellBalance.textContent =
-    fromResult.status === "fulfilled"
-      ? `Balance on ${from.label}: ${fromResult.value} ${from.token}`
-      : `Could not read ${from.label} balance.`;
+  if (fromResult.status === "fulfilled") {
+    sourceBalance = Number(fromResult.value);
+    sellBalance.textContent = `Balance on ${from.label}: ${fromResult.value} ${from.token}`;
+  } else {
+    sourceBalance = 0;
+    sellBalance.textContent = `Could not read ${from.label} balance.`;
+  }
 
   buyBalance.textContent =
     toResult.status === "fulfilled"
@@ -302,6 +309,7 @@ swapButton.addEventListener("click", () => {
   const nextFrom = toKey;
   toKey = fromKey;
   fromKey = nextFrom;
+  amountInput.value = "0";
   updateQuote();
   if (account) switchToNetwork(fromKey);
 });
@@ -322,23 +330,43 @@ trendButtons.forEach((button) => {
     const [from, to] = button.dataset.route.split(":");
     fromKey = from;
     toKey = to;
+    amountInput.value = "0";
     updateQuote();
     if (account) switchToNetwork(fromKey);
   });
 });
+swapTab.addEventListener("click", () => {
+  mode = "swap";
+  swapTab.classList.add("active");
+  buyTab.classList.remove("active");
+  amountInput.value = "0";
+  updateQuote();
+});
 buyTab.addEventListener("click", () => {
+  mode = "buy";
+  buyTab.classList.add("active");
+  swapTab.classList.remove("active");
   fromKey = "base";
   toKey = "ritual";
-  amountInput.value = amountInput.value === "0" ? "0.01" : amountInput.value;
+  amountInput.value = "0";
   updateQuote();
 });
 settingsButton.addEventListener("click", () => {
   routeDetails.classList.toggle("collapsed");
 });
 
-maxButton.addEventListener("click", () => {
-  amountInput.value = "0.05";
-  updateQuote();
+quickAmountButtons.forEach((button) => {
+  button.addEventListener("click", () => {
+    const percent = Number(button.dataset.percent);
+    const base = sourceBalance > 0 ? sourceBalance : 0;
+    amountInput.value = base > 0 ? ((base * percent) / 100).toFixed(6).replace(/\.?0+$/, "") : "0";
+    updateQuote();
+  });
+});
+
+themeToggle.addEventListener("click", () => {
+  document.body.classList.toggle("dark");
+  themeToggle.textContent = document.body.classList.contains("dark") ? "Light" : "Dark";
 });
 
 amountInput.addEventListener("input", updateQuote);

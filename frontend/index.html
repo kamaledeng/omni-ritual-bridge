@@ -28,7 +28,10 @@
         <kbd>/</kbd>
       </div>
 
-      <button type="button" id="connect" class="connect">Connect</button>
+      <div class="top-actions">
+        <button type="button" id="themeToggle" class="theme-toggle">Dark</button>
+        <button type="button" id="connect" class="connect">Connect</button>
+      </div>
     </header>
 
     <main class="page">
@@ -42,7 +45,7 @@
 
         <section class="swap-card">
           <div class="tabs">
-            <button type="button" class="active">Swap</button>
+            <button type="button" id="swapTab" class="active">Swap</button>
             <button type="button" id="buyTab">Buy</button>
             <button type="button" id="settingsButton" class="settings" title="Settings">S</button>
           </div>
@@ -68,7 +71,12 @@
 
               <div class="asset-foot">
                 <span id="sellUsd">$0.00</span>
-                <button type="button" id="maxAmount">MAX</button>
+                <div class="quick-amounts" aria-label="Quick amount">
+                  <button type="button" data-percent="25">25%</button>
+                  <button type="button" data-percent="50">50%</button>
+                  <button type="button" data-percent="75">75%</button>
+                  <button type="button" data-percent="100">MAX</button>
+                </div>
               </div>
               <p class="balance-note" id="sellBalance">Balance shown for selected source chain.</p>
             </section>
