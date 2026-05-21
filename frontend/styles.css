@@ -421,6 +421,102 @@ kbd {
   display: none;
 }
 
+body.buy-mode .swap-fields {
+  display: none;
+}
+
+.buy-panel {
+  display: none;
+}
+
+body.buy-mode .buy-panel {
+  display: grid;
+  gap: 10px;
+}
+
+.buy-amount-card,
+.buy-meta-card {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: #ffffff;
+}
+
+body.dark .buy-amount-card,
+body.dark .buy-meta-card {
+  background: var(--surface);
+}
+
+.buy-amount-card {
+  display: grid;
+  justify-items: center;
+  gap: 12px;
+  padding: 38px 16px 24px;
+}
+
+.buy-amount-card > span,
+.buy-meta-card span {
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.buy-amount-card input {
+  width: 180px;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--text);
+  text-align: center;
+  font-size: 52px;
+  font-weight: 850;
+}
+
+.buy-amount-card input::before {
+  content: "$";
+}
+
+.buy-token-pill {
+  min-width: 150px;
+}
+
+.buy-presets {
+  display: flex;
+  gap: 10px;
+}
+
+.buy-presets button {
+  min-height: 32px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 0 16px;
+  background: #ffffff;
+  color: var(--text);
+  font-weight: 800;
+}
+
+body.dark .buy-presets button {
+  background: var(--surface-soft);
+}
+
+.buy-meta-card {
+  display: grid;
+  gap: 14px;
+  padding: 18px 16px;
+}
+
+.buy-meta-card div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.buy-meta-card button {
+  border: 0;
+  background: transparent;
+  color: var(--purple);
+  font-weight: 850;
+}
+
 .route-details div {
   display: flex;
   justify-content: space-between;
@@ -511,6 +607,14 @@ kbd {
   box-shadow: 0 24px 80px rgba(16, 24, 40, 0.18);
 }
 
+.token-modal-card {
+  width: min(660px, calc(100vw - 28px));
+}
+
+.wallet-modal-card {
+  width: min(420px, calc(100vw - 28px));
+}
+
 .modal-head {
   display: flex;
   justify-content: space-between;
@@ -528,7 +632,10 @@ kbd {
   font-weight: 800;
 }
 
-.network-option {
+.network-option,
+.wallet-option,
+.token-option,
+.chain-option {
   width: 100%;
   min-height: 62px;
   display: grid;
@@ -543,18 +650,109 @@ kbd {
   text-align: left;
 }
 
-.network-option:hover {
+.network-option:hover,
+.wallet-option:hover,
+.token-option:hover,
+.chain-option:hover {
   border-color: var(--line-strong);
   background: #f8f8ff;
 }
 
 .network-option strong,
-.network-option small {
+.network-option small,
+.wallet-option strong,
+.wallet-option small,
+.token-option strong,
+.token-option small,
+.chain-option strong,
+.chain-option small {
   display: block;
 }
 
-.network-option small {
+.network-option small,
+.wallet-option small,
+.token-option small,
+.chain-option small {
   color: var(--muted);
+}
+
+.token-modal-grid {
+  display: grid;
+  grid-template-columns: 212px 1fr;
+  gap: 12px;
+}
+
+.chain-picker,
+.token-picker {
+  max-height: 490px;
+  overflow: auto;
+  border-radius: 10px;
+}
+
+.chain-picker {
+  padding: 8px;
+  background: #eef1f5;
+}
+
+body.dark .chain-picker {
+  background: #11141d;
+}
+
+.chain-picker input,
+.token-picker input {
+  width: 100%;
+  min-height: 40px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  margin-bottom: 8px;
+  padding: 0 12px;
+  outline: 0;
+}
+
+.chain-section {
+  display: block;
+  margin: 12px 8px 6px;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.chain-option {
+  min-height: 42px;
+  grid-template-columns: 28px 1fr;
+  margin-bottom: 4px;
+}
+
+.chain-option.active {
+  background: #dce1e8;
+}
+
+.token-option {
+  grid-template-columns: 38px 1fr auto;
+}
+
+.route-chip {
+  border-radius: 999px;
+  padding: 4px 8px;
+  background: #eef0ff;
+  color: var(--purple);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+body.dark .route-chip {
+  background: #252b42;
+}
+
+@media (max-width: 720px) {
+  .token-modal-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .chain-picker,
+  .token-picker {
+    max-height: 300px;
+  }
 }
 
 @media (max-width: 900px) {

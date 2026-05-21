@@ -20,7 +20,7 @@
       <nav class="nav-links" aria-label="Primary">
         <a class="active" href="#">Swap</a>
         <a href="#">Routes</a>
-        <a href="#">Transactions</a>
+        <a href="https://explorer.ritualfoundation.org" target="_blank" rel="noreferrer">Transactions</a>
       </nav>
 
       <div class="search">
@@ -51,6 +51,7 @@
           </div>
 
           <form id="bridge-form">
+            <div class="swap-fields">
             <section class="asset-box">
               <div class="asset-top">
                 <span>Sell</span>
@@ -122,6 +123,39 @@
                 <strong id="feeLabel">~0.002 ETH</strong>
               </div>
             </div>
+            </div>
+
+            <section class="buy-panel" id="buyPanel">
+              <div class="buy-amount-card">
+                <span>Enter an amount</span>
+                <input id="buyUsdAmount" type="number" value="20" min="0" step="1" aria-label="Buy amount in dollars" />
+                <small id="buyCryptoQuote">0.00938 ETH</small>
+                <button type="button" class="token-pill buy-token-pill" id="buyModeToken">
+                  <span class="coin eth">E</span>
+                  <span>
+                    <strong>ETH</strong>
+                    <small>Ethereum</small>
+                  </span>
+                  <b>&gt;</b>
+                </button>
+                <div class="buy-presets">
+                  <button type="button" data-buy-usd="100">$100</button>
+                  <button type="button" data-buy-usd="300">$300</button>
+                  <button type="button" data-buy-usd="1000">$1,000</button>
+                </div>
+              </div>
+
+              <div class="buy-meta-card">
+                <div>
+                  <span>Recipient</span>
+                  <button type="button" id="buyRecipient">Select wallet</button>
+                </div>
+                <div>
+                  <span>Paying with</span>
+                  <strong>Card</strong>
+                </div>
+              </div>
+            </section>
 
             <button class="primary" type="submit" id="bridgeButton">Connect Wallet</button>
           </form>
@@ -133,24 +167,37 @@
       </section>
     </main>
 
-    <section class="modal" id="networkModal" aria-hidden="true">
-      <div class="modal-card">
+    <section class="modal" id="tokenModal" aria-hidden="true">
+      <div class="modal-card token-modal-card">
         <div class="modal-head">
-          <strong id="modalTitle">Select network</strong>
+          <strong id="modalTitle">Select Token</strong>
           <button type="button" id="closeModal">Close</button>
         </div>
-        <button type="button" class="network-option" data-network="base">
-          <span class="coin eth">E</span>
-          <span><strong>Base Sepolia</strong><small>ETH</small></span>
-        </button>
-        <button type="button" class="network-option" data-network="ritual">
-          <span class="coin ritual">R</span>
-          <span><strong>Ritual Testnet</strong><small>RITUAL</small></span>
-        </button>
-        <button type="button" class="network-option" data-network="sepolia">
-          <span class="coin eth">E</span>
-          <span><strong>Ethereum Sepolia</strong><small>ETH</small></span>
-        </button>
+        <div class="token-modal-grid">
+          <aside class="chain-picker">
+            <input id="chainSearch" placeholder="Search chains" />
+            <button type="button" class="chain-option active" data-chain="all">All Chains</button>
+            <span class="chain-section">Starred Chains</span>
+            <div id="starredChains"></div>
+            <span class="chain-section">Chains A-Z</span>
+            <div id="allChains"></div>
+          </aside>
+          <section class="token-picker">
+            <input id="tokenSearch" placeholder="Search for a token or paste address" />
+            <span class="chain-section">Global 24H Volume</span>
+            <div id="tokenList"></div>
+          </section>
+        </div>
+      </div>
+    </section>
+
+    <section class="modal" id="walletModal" aria-hidden="true">
+      <div class="modal-card wallet-modal-card">
+        <div class="modal-head">
+          <strong>Select Wallet</strong>
+          <button type="button" id="closeWalletModal">Close</button>
+        </div>
+        <div id="walletList"></div>
       </div>
     </section>
 

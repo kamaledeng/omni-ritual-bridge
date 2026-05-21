@@ -1,4 +1,15 @@
 const NETWORKS = {
+  ethereum: {
+    label: "Ethereum",
+    short: "Ethereum",
+    token: "ETH",
+    coin: "E",
+    chainId: 1,
+    hexChainId: "0x1",
+    eid: 30101,
+    rpcUrls: ["https://ethereum-rpc.publicnode.com"],
+    explorerUrls: ["https://etherscan.io"],
+  },
   base: {
     label: "Base Sepolia",
     short: "Base",
@@ -32,6 +43,62 @@ const NETWORKS = {
     rpcUrls: ["https://sepolia.drpc.org"],
     explorerUrls: ["https://sepolia.etherscan.io"],
   },
+  optimism: {
+    label: "Optimism",
+    short: "Optimism",
+    token: "ETH",
+    coin: "O",
+    chainId: 10,
+    hexChainId: "0xa",
+    eid: 30111,
+    rpcUrls: ["https://mainnet.optimism.io"],
+    explorerUrls: ["https://optimistic.etherscan.io"],
+  },
+  arbitrum: {
+    label: "Arbitrum",
+    short: "Arbitrum",
+    token: "ETH",
+    coin: "A",
+    chainId: 42161,
+    hexChainId: "0xa4b1",
+    eid: 30110,
+    rpcUrls: ["https://arb1.arbitrum.io/rpc"],
+    explorerUrls: ["https://arbiscan.io"],
+  },
+  polygon: {
+    label: "Polygon",
+    short: "Polygon",
+    token: "POL",
+    coin: "P",
+    chainId: 137,
+    hexChainId: "0x89",
+    eid: 30109,
+    rpcUrls: ["https://polygon-bor-rpc.publicnode.com"],
+    explorerUrls: ["https://polygonscan.com"],
+  },
+  bnb: {
+    label: "BNB Chain",
+    short: "BNB",
+    token: "BNB",
+    coin: "B",
+    chainId: 56,
+    hexChainId: "0x38",
+    eid: 30102,
+    rpcUrls: ["https://bsc-dataseed.binance.org"],
+    explorerUrls: ["https://bscscan.com"],
+  },
+  solana: {
+    label: "Solana",
+    short: "Solana",
+    token: "SOL",
+    coin: "S",
+    chainId: null,
+    hexChainId: null,
+    eid: null,
+    rpcUrls: [],
+    explorerUrls: ["https://solscan.io"],
+    nonEvm: true,
+  },
 };
 
 const connectButton = document.querySelector("#connect");
@@ -60,19 +127,50 @@ const txCard = document.querySelector("#tx-card");
 const buyTab = document.querySelector("#buyTab");
 const swapTab = document.querySelector("#swapTab");
 const settingsButton = document.querySelector("#settingsButton");
-const networkModal = document.querySelector("#networkModal");
+const tokenModal = document.querySelector("#tokenModal");
 const modalTitle = document.querySelector("#modalTitle");
 const closeModal = document.querySelector("#closeModal");
-const networkOptions = [...document.querySelectorAll(".network-option")];
+const chainSearch = document.querySelector("#chainSearch");
+const tokenSearch = document.querySelector("#tokenSearch");
+const starredChains = document.querySelector("#starredChains");
+const allChains = document.querySelector("#allChains");
+const tokenList = document.querySelector("#tokenList");
+const walletModal = document.querySelector("#walletModal");
+const closeWalletModal = document.querySelector("#closeWalletModal");
+const walletList = document.querySelector("#walletList");
+const buyModeToken = document.querySelector("#buyModeToken");
+const buyRecipient = document.querySelector("#buyRecipient");
+const buyUsdAmount = document.querySelector("#buyUsdAmount");
+const buyCryptoQuote = document.querySelector("#buyCryptoQuote");
 const trendButtons = [...document.querySelectorAll("[data-route]")];
 const quickAmountButtons = [...document.querySelectorAll("[data-percent]")];
+const buyPresetButtons = [...document.querySelectorAll("[data-buy-usd]")];
+const allChainsButton = document.querySelector('[data-chain="all"]');
 
 let account = "";
 let fromKey = "base";
 let toKey = "ritual";
 let selectingSide = "from";
+let selectedChainFilter = "all";
+let selectedProvider = null;
+const announcedProviders = [];
 let mode = "swap";
 let sourceBalance = 0;
+
+const TOKENS = [
+  { symbol: "ETH", name: "Ether", chain: "ethereum", address: "0x0000...0000", volume: "High" },
+  { symbol: "ETH", name: "Ether", chain: "base", address: "0x0000...0000", volume: "High" },
+  { symbol: "RITUAL", name: "Ritual Testnet", chain: "ritual", address: "native", volume: "Testnet" },
+  { symbol: "ORIT", name: "Omni Ritual", chain: "ritual", address: "coming soon", volume: "Coming soon" },
+  { symbol: "USDC", name: "USD Coin", chain: "ethereum", address: "0xa0...eb48", volume: "High" },
+  { symbol: "USDC", name: "USD Coin", chain: "base", address: "0x83...2913", volume: "High" },
+  { symbol: "ETH", name: "Ether", chain: "sepolia", address: "0x0000...0000", volume: "Testnet" },
+  { symbol: "ETH", name: "Ether", chain: "optimism", address: "0x0000...0000", volume: "High" },
+  { symbol: "ETH", name: "Ether", chain: "arbitrum", address: "0x0000...0000", volume: "High" },
+  { symbol: "POL", name: "Polygon", chain: "polygon", address: "native", volume: "High" },
+  { symbol: "BNB", name: "BNB", chain: "bnb", address: "native", volume: "High" },
+  { symbol: "SOL", name: "Solana", chain: "solana", address: "native", volume: "Display only" },
+];
 
 const ROUTES = {
   "base:sepolia": {
@@ -125,6 +223,7 @@ function formatUnits(hexWei) {
 }
 
 async function rpcBalance(network, address) {
+  if (network.nonEvm || !network.rpcUrls.length) return "0";
   const response = await fetch(network.rpcUrls[0], {
     method: "POST",
     headers: { "content-type": "application/json" },
@@ -183,6 +282,127 @@ function setTokenButton(button, network, variant) {
   chain.textContent = network.short;
 }
 
+function providerName(provider) {
+  if (provider?.info?.name) return provider.info.name;
+  if (provider?.isMetaMask) return "MetaMask";
+  if (provider?.isCoinbaseWallet) return "Coinbase Wallet";
+  if (provider?.isRabby) return "Rabby";
+  if (provider?.isTrust) return "Trust Wallet";
+  return "Injected Wallet";
+}
+
+function providers() {
+  const list = [];
+  list.push(...announcedProviders.map((entry) => entry.provider));
+  if (window.ethereum?.providers) list.push(...window.ethereum.providers);
+  if (window.ethereum) list.push(window.ethereum);
+  return [...new Map(list.map((provider) => [providerName(provider), provider])).values()];
+}
+
+function renderWallets() {
+  const detected = providers();
+  walletList.innerHTML = "";
+
+  if (!detected.length) {
+    walletList.innerHTML = `<p class="balance-note">No injected wallet found. Install MetaMask, Rabby, Coinbase Wallet, or another EVM wallet.</p>`;
+    return;
+  }
+
+  detected.forEach((provider) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "wallet-option";
+    button.innerHTML = `
+      <span class="coin ritual">W</span>
+      <span><strong>${providerName(provider)}</strong><small>Connect EVM wallet</small></span>
+    `;
+    button.addEventListener("click", () => connect(provider));
+    walletList.appendChild(button);
+  });
+}
+
+function openWalletModal() {
+  renderWallets();
+  walletModal.classList.add("open");
+  walletModal.setAttribute("aria-hidden", "false");
+}
+
+function closeWalletPicker() {
+  walletModal.classList.remove("open");
+  walletModal.setAttribute("aria-hidden", "true");
+}
+
+function renderChainButtons() {
+  const query = chainSearch.value.trim().toLowerCase();
+  const entries = Object.entries(NETWORKS).filter(([, network]) => network.label.toLowerCase().includes(query));
+  const starred = entries.filter(([key]) => ["ritual", "base", "ethereum", "sepolia"].includes(key));
+  const rest = entries.filter(([key]) => !["ritual", "base", "ethereum", "sepolia"].includes(key));
+
+  function makeButton(key, network) {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = `chain-option ${selectedChainFilter === key ? "active" : ""}`;
+    button.dataset.chain = key;
+    button.innerHTML = `<span class="coin ${key === "ritual" ? "ritual" : "eth"}">${network.coin}</span><span>${network.label}</span>`;
+    button.addEventListener("click", () => {
+      selectedChainFilter = key;
+      renderTokenModal();
+    });
+    return button;
+  }
+
+  starredChains.innerHTML = "";
+  allChains.innerHTML = "";
+  starred.forEach(([key, network]) => starredChains.appendChild(makeButton(key, network)));
+  rest.forEach(([key, network]) => allChains.appendChild(makeButton(key, network)));
+}
+
+function renderTokenModal() {
+  renderChainButtons();
+  const tokenQuery = tokenSearch.value.trim().toLowerCase();
+  const tokens = TOKENS.filter((token) => {
+    const chainMatch = selectedChainFilter === "all" || token.chain === selectedChainFilter;
+    const tokenMatch = [token.symbol, token.name, token.address, NETWORKS[token.chain].label]
+      .join(" ")
+      .toLowerCase()
+      .includes(tokenQuery);
+    return chainMatch && tokenMatch;
+  });
+
+  document.querySelectorAll(".chain-option").forEach((button) => {
+    button.classList.toggle("active", button.dataset.chain === selectedChainFilter);
+  });
+
+  tokenList.innerHTML = "";
+  tokens.forEach((token) => {
+    const network = NETWORKS[token.chain];
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "token-option";
+    button.innerHTML = `
+      <span class="coin ${token.chain === "ritual" ? "ritual" : "eth"}">${network.coin}</span>
+      <span><strong>${token.symbol}</strong><small>${network.label} ${token.address}</small></span>
+      <span class="route-chip">${token.volume}</span>
+    `;
+    button.addEventListener("click", () => chooseToken(token));
+    tokenList.appendChild(button);
+  });
+}
+
+function chooseToken(token) {
+  if (selectingSide === "from") {
+    fromKey = token.chain;
+    if (fromKey === toKey) toKey = fromKey === "ritual" ? "base" : "ritual";
+  } else {
+    toKey = token.chain;
+    if (fromKey === toKey) fromKey = toKey === "ritual" ? "base" : "ritual";
+  }
+
+  updateQuote();
+  closeTokenModal();
+  if (account && !NETWORKS[fromKey].nonEvm) switchToNetwork(fromKey);
+}
+
 function updateQuote() {
   const amount = Number(amountInput.value || 0);
   const from = NETWORKS[fromKey];
@@ -210,6 +430,7 @@ function updateQuote() {
   toChainLabel.textContent = to.short;
   setTokenButton(sellToken, from, fromKey === "ritual" ? "ritual" : "eth");
   setTokenButton(buyToken, to, toKey === "ritual" ? "ritual" : "eth");
+  setTokenButton(buyModeToken, to, toKey === "ritual" ? "ritual" : "eth");
   bridgeButton.textContent = account ? (route.available ? `Bridge from ${from.short}` : "Coming Soon") : "Connect Wallet";
   bridgeButton.disabled = Boolean(account && !route.available);
   updateBalances();
@@ -230,17 +451,19 @@ function walletChainParams(network) {
 }
 
 async function switchToNetwork(key) {
-  if (!window.ethereum) return;
+  const wallet = selectedProvider || window.ethereum;
+  if (!wallet) return;
   const network = NETWORKS[key];
+  if (network.nonEvm || !network.hexChainId) return;
 
   try {
-    await window.ethereum.request({
+    await wallet.request({
       method: "wallet_switchEthereumChain",
       params: [{ chainId: network.hexChainId }],
     });
   } catch (error) {
     if (error && error.code === 4902) {
-      await window.ethereum.request({
+      await wallet.request({
         method: "wallet_addEthereumChain",
         params: [walletChainParams(network)],
       });
@@ -250,14 +473,16 @@ async function switchToNetwork(key) {
   }
 }
 
-async function connect() {
-  if (!window.ethereum) {
+async function connect(provider = selectedProvider || window.ethereum) {
+  if (!provider) {
     connectButton.textContent = "No wallet";
     bridgeButton.textContent = "No Wallet Found";
+    openWalletModal();
     return;
   }
 
-  const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
+  selectedProvider = provider;
+  const accounts = await provider.request({ method: "eth_requestAccounts" });
   account = accounts[0] || "";
   await switchToNetwork(fromKey);
 
@@ -266,37 +491,23 @@ async function connect() {
   connectButton.textContent = label || "Connect";
   sellWallet.textContent = label || "Select wallet";
   buyWallet.textContent = label || "Select wallet";
+  buyRecipient.textContent = label || "Select wallet";
+  closeWalletPicker();
   updateQuote();
 }
 
-function openNetworkModal(side) {
+function openTokenModal(side) {
   selectingSide = side;
-  modalTitle.textContent = side === "from" ? "Select sell network" : "Select buy network";
-  networkModal.classList.add("open");
-  networkModal.setAttribute("aria-hidden", "false");
+  selectedChainFilter = "all";
+  modalTitle.textContent = side === "from" ? "Select Sell Token" : "Select Buy Token";
+  tokenModal.classList.add("open");
+  tokenModal.setAttribute("aria-hidden", "false");
+  renderTokenModal();
 }
 
-function closeNetworkModal() {
-  networkModal.classList.remove("open");
-  networkModal.setAttribute("aria-hidden", "true");
-}
-
-function chooseNetwork(key) {
-  if (selectingSide === "from") {
-    fromKey = key;
-    if (fromKey === toKey) {
-      toKey = key === "ritual" ? "base" : "ritual";
-    }
-  } else {
-    toKey = key;
-    if (fromKey === toKey) {
-      fromKey = key === "ritual" ? "base" : "ritual";
-    }
-  }
-
-  updateQuote();
-  closeNetworkModal();
-  if (account) switchToNetwork(fromKey);
+function closeTokenModal() {
+  tokenModal.classList.remove("open");
+  tokenModal.setAttribute("aria-hidden", "true");
 }
 
 async function digestRequest(payload) {
@@ -314,17 +525,26 @@ swapButton.addEventListener("click", () => {
   if (account) switchToNetwork(fromKey);
 });
 
-sellToken.addEventListener("click", () => openNetworkModal("from"));
-buyToken.addEventListener("click", () => openNetworkModal("to"));
-sellWallet.addEventListener("click", connect);
-buyWallet.addEventListener("click", connect);
-closeModal.addEventListener("click", closeNetworkModal);
-networkModal.addEventListener("click", (event) => {
-  if (event.target === networkModal) closeNetworkModal();
+sellToken.addEventListener("click", () => openTokenModal("from"));
+buyToken.addEventListener("click", () => openTokenModal("to"));
+buyModeToken.addEventListener("click", () => openTokenModal("to"));
+sellWallet.addEventListener("click", openWalletModal);
+buyWallet.addEventListener("click", openWalletModal);
+buyRecipient.addEventListener("click", openWalletModal);
+closeModal.addEventListener("click", closeTokenModal);
+closeWalletModal.addEventListener("click", closeWalletPicker);
+allChainsButton.addEventListener("click", () => {
+  selectedChainFilter = "all";
+  renderTokenModal();
 });
-networkOptions.forEach((button) => {
-  button.addEventListener("click", () => chooseNetwork(button.dataset.network));
+tokenModal.addEventListener("click", (event) => {
+  if (event.target === tokenModal) closeTokenModal();
 });
+walletModal.addEventListener("click", (event) => {
+  if (event.target === walletModal) closeWalletPicker();
+});
+chainSearch.addEventListener("input", renderTokenModal);
+tokenSearch.addEventListener("input", renderTokenModal);
 trendButtons.forEach((button) => {
   button.addEventListener("click", () => {
     const [from, to] = button.dataset.route.split(":");
@@ -337,6 +557,7 @@ trendButtons.forEach((button) => {
 });
 swapTab.addEventListener("click", () => {
   mode = "swap";
+  document.body.classList.remove("buy-mode");
   swapTab.classList.add("active");
   buyTab.classList.remove("active");
   amountInput.value = "0";
@@ -344,12 +565,19 @@ swapTab.addEventListener("click", () => {
 });
 buyTab.addEventListener("click", () => {
   mode = "buy";
+  document.body.classList.add("buy-mode");
   buyTab.classList.add("active");
   swapTab.classList.remove("active");
   fromKey = "base";
   toKey = "ritual";
   amountInput.value = "0";
   updateQuote();
+});
+buyPresetButtons.forEach((button) => {
+  button.addEventListener("click", () => {
+    buyUsdAmount.value = button.dataset.buyUsd;
+    buyCryptoQuote.textContent = `${(Number(button.dataset.buyUsd) / 2132).toFixed(5)} ETH`;
+  });
 });
 settingsButton.addEventListener("click", () => {
   routeDetails.classList.toggle("collapsed");
@@ -369,10 +597,17 @@ themeToggle.addEventListener("click", () => {
   themeToggle.textContent = document.body.classList.contains("dark") ? "Light" : "Dark";
 });
 
+window.addEventListener("eip6963:announceProvider", (event) => {
+  if (!announcedProviders.some((entry) => entry.info.uuid === event.detail.info.uuid)) {
+    announcedProviders.push(event.detail);
+  }
+});
+window.dispatchEvent(new Event("eip6963:requestProvider"));
+
 amountInput.addEventListener("input", updateQuote);
-connectButton.addEventListener("click", connect);
+connectButton.addEventListener("click", openWalletModal);
 bridgeButton.addEventListener("click", () => {
-  if (!account) connect();
+  if (!account) openWalletModal();
 });
 
 form.addEventListener("submit", async (event) => {
