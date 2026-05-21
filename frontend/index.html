@@ -5,109 +5,117 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta
       name="description"
-      content="Omni Ritual Bridge transfers testnet tokens across LayerZero-supported chains with Ritual verification."
+      content="Ritual Bridge is a testnet bridge interface for routing assets to and from Ritual testnet."
     />
-    <title>Omni Ritual Bridge</title>
+    <title>Ritual Bridge</title>
     <link rel="stylesheet" href="./styles.css" />
   </head>
   <body>
-    <main class="shell">
-      <nav class="nav">
-        <strong>Omni Ritual Bridge</strong>
-        <button type="button" id="connect">Connect Wallet</button>
+    <header class="topbar">
+      <a class="brand" href="#" aria-label="Ritual Bridge">
+        <span class="brand-mark"></span>
+        <span>RITUAL BRIDGE</span>
+      </a>
+
+      <nav class="nav-links" aria-label="Primary">
+        <a class="active" href="#">Swap</a>
+        <a href="#">Routes</a>
+        <a href="#">Transactions</a>
       </nav>
 
-      <section class="layout">
-        <section class="bridge-card">
-          <div class="card-head">
-            <div>
-              <p class="eyebrow">Testnet bridge</p>
-              <h1>Bridge</h1>
-            </div>
-            <span class="network-pill">LayerZero OFT</span>
+      <div class="search">
+        <span>Search network or token</span>
+        <kbd>/</kbd>
+      </div>
+
+      <button type="button" id="connect" class="connect">Connect</button>
+    </header>
+
+    <main class="page">
+      <section class="swap-shell">
+        <div class="trend-row">
+          <span class="trend-label">Trending</span>
+          <button type="button">RITUAL</button>
+          <button type="button">ORIT</button>
+          <button type="button">LZ</button>
+        </div>
+
+        <section class="swap-card">
+          <div class="tabs">
+            <button type="button" class="active">Swap</button>
+            <button type="button">Buy</button>
+            <button type="button" class="settings" title="Settings">S</button>
           </div>
 
           <form id="bridge-form">
-            <div class="chain-grid">
-              <label class="field">
-                <span>From</span>
-                <select id="fromChain">
-                  <option value="baseSepolia">Base Sepolia</option>
-                  <option value="sepolia">Ethereum Sepolia</option>
-                  <option value="optimismSepolia">Optimism Sepolia</option>
-                </select>
-              </label>
+            <section class="asset-box">
+              <div class="asset-top">
+                <span>Sell</span>
+                <button type="button" id="sellWallet">Select wallet</button>
+              </div>
 
-              <button type="button" id="swapChains" class="swap" title="Swap chains">&lt;&gt;</button>
+              <div class="asset-main">
+                <input id="amount" type="number" value="0" min="0" step="0.0001" aria-label="Sell amount" />
+                <button type="button" class="token-pill" id="sellToken">
+                  <span class="coin eth">E</span>
+                  <span>
+                    <strong>ETH</strong>
+                    <small id="fromChainLabel">Base Sepolia</small>
+                  </span>
+                  <b>&gt;</b>
+                </button>
+              </div>
 
-              <label class="field">
-                <span>To</span>
-                <select id="toChain">
-                  <option value="sepolia">Ethereum Sepolia</option>
-                  <option value="baseSepolia">Base Sepolia</option>
-                  <option value="optimismSepolia">Optimism Sepolia</option>
-                </select>
-              </label>
-            </div>
-
-            <section class="amount-box">
-              <div class="amount-top">
-                <span>Amount</span>
+              <div class="asset-foot">
+                <span id="sellUsd">$0.00</span>
                 <button type="button" id="maxAmount">MAX</button>
               </div>
-              <div class="amount-row">
-                <input id="amount" type="number" value="10" min="0" step="0.0001" />
-                <select id="token">
-                  <option value="ORIT">ORIT</option>
-                </select>
-              </div>
-              <small>Balance: demo mode</small>
             </section>
 
-            <label class="field">
-              <span>Recipient</span>
-              <input id="recipient" placeholder="0x..." />
-            </label>
+            <button type="button" id="swapChains" class="switcher" title="Switch direction">v</button>
 
-            <section class="route-box">
+            <section class="asset-box">
+              <div class="asset-top">
+                <span>Buy</span>
+                <button type="button" id="buyWallet">Select wallet</button>
+              </div>
+
+              <div class="asset-main">
+                <input id="receiveAmount" type="number" value="0" readonly aria-label="Receive amount" />
+                <button type="button" class="token-pill" id="buyToken">
+                  <span class="coin ritual">R</span>
+                  <span>
+                    <strong>RITUAL</strong>
+                    <small id="toChainLabel">Ritual Testnet</small>
+                  </span>
+                  <b>&gt;</b>
+                </button>
+              </div>
+
+              <div class="asset-foot">
+                <span id="buyUsd">$0.00</span>
+                <span id="routeLabel">Base Sepolia -> Ritual Testnet</span>
+              </div>
+            </section>
+
+            <div class="route-details">
               <div>
                 <span>Route</span>
-                <strong id="routeLabel">Base Sepolia -> Ethereum Sepolia</strong>
+                <strong id="routeDetail">LayerZero OFT + Ritual verifier</strong>
               </div>
               <div>
                 <span>Estimated fee</span>
                 <strong id="feeLabel">~0.002 ETH</strong>
               </div>
-              <div>
-                <span>Receive</span>
-                <strong id="receiveLabel">10 ORIT</strong>
-              </div>
-            </section>
+            </div>
 
-            <button class="primary" type="submit">Bridge</button>
+            <button class="primary" type="submit" id="bridgeButton">Connect Wallet</button>
           </form>
         </section>
 
-        <aside class="side-panel">
-          <div class="status-card">
-            <p class="eyebrow">Ritual verification</p>
-            <strong id="verdict-label">READY</strong>
-            <p id="verdict-copy">
-              Ritual stores the bridge intent and verification trail. The token transfer itself uses LayerZero OFT.
-            </p>
-          </div>
-
-          <div id="tx-card" class="tx-card">
-            <span>No bridge request yet.</span>
-          </div>
-
-          <div class="timeline">
-            <div class="step active">Quote</div>
-            <div class="step">Approve</div>
-            <div class="step">Bridge</div>
-            <div class="step">Receive</div>
-          </div>
-        </aside>
+        <section class="activity-card" id="tx-card">
+          <span>No transaction yet.</span>
+        </section>
       </section>
     </main>
 
