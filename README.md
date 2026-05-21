@@ -56,6 +56,24 @@ docs/
 5. Jalankan agent/verifier untuk memberi verdict di contract.
 6. Tampilkan status intent sebagai "Ritual verified".
 
+## Deploy ke Vercel
+
+Project ini sudah siap deploy dari GitHub ke Vercel.
+
+Settings yang dipakai:
+
+- Framework Preset: `Other`
+- Build Command: `npm run build`
+- Output Directory: `dist`
+
+Vercel akan menyalin isi `frontend/` ke `dist/` lewat `scripts/build.js`.
+
+Local check:
+
+```bash
+npm run build
+```
+
 ## Langkah Lanjut
 
 1. Tambahkan agent kecil yang memanggil API risk scoring lalu submit verdict ke `finalizeIntent`.

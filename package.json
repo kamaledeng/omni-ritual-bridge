@@ -1,0 +1,19 @@
+{
+  "name": "omni-ritual-bridge",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Ritual testnet intent bridge demo with AI/policy verification.",
+  "scripts": {
+    "build": "node scripts/build.js",
+    "preview": "npx serve dist"
+  },
+  "keywords": [
+    "ritual",
+    "bridge",
+    "layerzero",
+    "intent",
+    "testnet"
+  ],
+  "license": "MIT"
+}
+
