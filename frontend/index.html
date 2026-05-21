@@ -14,10 +14,10 @@
     <main class="shell">
       <section class="hero">
         <div>
-          <p class="eyebrow">Ritual testnet bridge concept</p>
-          <h1>Ritual Intent Bridge</h1>
+          <p class="eyebrow">LayerZero OFT + Ritual verification</p>
+          <h1>Omni Ritual Bridge</h1>
           <p class="lead">
-            Cross-chain intents verified by Ritual before bridge execution.
+            Bridge tokens across supported testnets, with Ritual recording the intent and verification trail.
           </p>
         </div>
         <div class="status-panel">
@@ -37,13 +37,13 @@
           </div>
 
           <label>
-            Source chain ID
+            Source chain ID / EID
             <input id="srcChain" type="number" value="84532" min="1" />
           </label>
 
           <label>
-            Destination chain ID
-            <input id="dstChain" type="number" value="1979" min="1" />
+            Destination chain ID / EID
+            <input id="dstChain" type="number" value="11155111" min="1" />
           </label>
 
           <label>
@@ -63,7 +63,7 @@
 
           <label>
             Intent instruction
-            <textarea id="instruction">Bridge only if route is safe, cost is reasonable, and recipient matches my wallet.</textarea>
+            <textarea id="instruction">Bridge from Base Sepolia to Ethereum Sepolia only if route is safe, cost is reasonable, and recipient matches my wallet.</textarea>
           </label>
 
           <button class="primary" type="submit">Generate Intent</button>
@@ -79,8 +79,8 @@
           </div>
           <div class="timeline">
             <div class="step active">Intent</div>
-            <div class="step">Ritual Verify</div>
-            <div class="step">LayerZero Send</div>
+            <div class="step">Ritual Log</div>
+            <div class="step">LayerZero OFT</div>
             <div class="step">Claim</div>
           </div>
         </section>

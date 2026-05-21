@@ -77,7 +77,7 @@ function localVerdict(intent) {
 
   return {
     label: "APPROVED",
-    reason: "Intent passes the local demo policy. Submit the same payload to Ritual for on-chain verification.",
+    reason: "Intent passes the local demo policy. Submit the same payload to Ritual, then bridge with LayerZero OFT.",
     active: 3,
   };
 }
