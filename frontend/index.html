@@ -35,16 +35,16 @@
       <section class="swap-shell">
         <div class="trend-row">
           <span class="trend-label">Trending</span>
-          <button type="button">RITUAL</button>
-          <button type="button">ORIT</button>
-          <button type="button">LZ</button>
+          <button type="button" data-route="base:ritual">RITUAL</button>
+          <button type="button" data-route="sepolia:ritual">ORIT</button>
+          <button type="button" data-route="ritual:base">LZ</button>
         </div>
 
         <section class="swap-card">
           <div class="tabs">
             <button type="button" class="active">Swap</button>
-            <button type="button">Buy</button>
-            <button type="button" class="settings" title="Settings">S</button>
+            <button type="button" id="buyTab">Buy</button>
+            <button type="button" id="settingsButton" class="settings" title="Settings">S</button>
           </div>
 
           <form id="bridge-form">
@@ -118,6 +118,27 @@
         </section>
       </section>
     </main>
+
+    <section class="modal" id="networkModal" aria-hidden="true">
+      <div class="modal-card">
+        <div class="modal-head">
+          <strong id="modalTitle">Select network</strong>
+          <button type="button" id="closeModal">Close</button>
+        </div>
+        <button type="button" class="network-option" data-network="base">
+          <span class="coin eth">E</span>
+          <span><strong>Base Sepolia</strong><small>ETH</small></span>
+        </button>
+        <button type="button" class="network-option" data-network="ritual">
+          <span class="coin ritual">R</span>
+          <span><strong>Ritual Testnet</strong><small>RITUAL</small></span>
+        </button>
+        <button type="button" class="network-option" data-network="sepolia">
+          <span class="coin eth">E</span>
+          <span><strong>Ethereum Sepolia</strong><small>ETH</small></span>
+        </button>
+      </div>
+    </section>
 
     <script src="./app.js"></script>
   </body>

@@ -46,6 +46,7 @@ const buyUsd = document.querySelector("#buyUsd");
 const routeLabel = document.querySelector("#routeLabel");
 const routeDetail = document.querySelector("#routeDetail");
 const feeLabel = document.querySelector("#feeLabel");
+const routeDetails = document.querySelector(".route-details");
 const fromChainLabel = document.querySelector("#fromChainLabel");
 const toChainLabel = document.querySelector("#toChainLabel");
 const sellToken = document.querySelector("#sellToken");
@@ -53,10 +54,18 @@ const buyToken = document.querySelector("#buyToken");
 const swapButton = document.querySelector("#swapChains");
 const maxButton = document.querySelector("#maxAmount");
 const txCard = document.querySelector("#tx-card");
+const buyTab = document.querySelector("#buyTab");
+const settingsButton = document.querySelector("#settingsButton");
+const networkModal = document.querySelector("#networkModal");
+const modalTitle = document.querySelector("#modalTitle");
+const closeModal = document.querySelector("#closeModal");
+const networkOptions = [...document.querySelectorAll(".network-option")];
+const trendButtons = [...document.querySelectorAll("[data-route]")];
 
 let account = "";
 let fromKey = "base";
 let toKey = "ritual";
+let selectingSide = "from";
 
 function shortAddress(value) {
   if (!value || value.length < 12) return value || "";
@@ -153,6 +162,36 @@ async function connect() {
   updateQuote();
 }
 
+function openNetworkModal(side) {
+  selectingSide = side;
+  modalTitle.textContent = side === "from" ? "Select sell network" : "Select buy network";
+  networkModal.classList.add("open");
+  networkModal.setAttribute("aria-hidden", "false");
+}
+
+function closeNetworkModal() {
+  networkModal.classList.remove("open");
+  networkModal.setAttribute("aria-hidden", "true");
+}
+
+function chooseNetwork(key) {
+  if (selectingSide === "from") {
+    fromKey = key;
+    if (fromKey === toKey) {
+      toKey = key === "ritual" ? "base" : "ritual";
+    }
+  } else {
+    toKey = key;
+    if (fromKey === toKey) {
+      fromKey = key === "ritual" ? "base" : "ritual";
+    }
+  }
+
+  updateQuote();
+  closeNetworkModal();
+  if (account) switchToNetwork(fromKey);
+}
+
 async function digestRequest(payload) {
   const encoded = new TextEncoder().encode(JSON.stringify(payload));
   const digest = await crypto.subtle.digest("SHA-256", encoded);
@@ -165,6 +204,36 @@ swapButton.addEventListener("click", () => {
   fromKey = nextFrom;
   updateQuote();
   if (account) switchToNetwork(fromKey);
+});
+
+sellToken.addEventListener("click", () => openNetworkModal("from"));
+buyToken.addEventListener("click", () => openNetworkModal("to"));
+sellWallet.addEventListener("click", connect);
+buyWallet.addEventListener("click", connect);
+closeModal.addEventListener("click", closeNetworkModal);
+networkModal.addEventListener("click", (event) => {
+  if (event.target === networkModal) closeNetworkModal();
+});
+networkOptions.forEach((button) => {
+  button.addEventListener("click", () => chooseNetwork(button.dataset.network));
+});
+trendButtons.forEach((button) => {
+  button.addEventListener("click", () => {
+    const [from, to] = button.dataset.route.split(":");
+    fromKey = from;
+    toKey = to;
+    updateQuote();
+    if (account) switchToNetwork(fromKey);
+  });
+});
+buyTab.addEventListener("click", () => {
+  fromKey = "base";
+  toKey = "ritual";
+  amountInput.value = amountInput.value === "0" ? "0.01" : amountInput.value;
+  updateQuote();
+});
+settingsButton.addEventListener("click", () => {
+  routeDetails.classList.toggle("collapsed");
 });
 
 maxButton.addEventListener("click", () => {
