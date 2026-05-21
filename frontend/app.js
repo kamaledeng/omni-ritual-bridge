@@ -112,6 +112,59 @@ function money(value) {
   return `$${Number(value || 0).toFixed(2)}`;
 }
 
+function formatUnits(hexWei) {
+  const value = BigInt(hexWei || "0x0");
+  const whole = value / 10n ** 18n;
+  const fraction = value % 10n ** 18n;
+  const fractionText = fraction.toString().padStart(18, "0").slice(0, 4);
+  return `${whole.toString()}.${fractionText}`.replace(/\.?0+$/, "");
+}
+
+async function rpcBalance(network, address) {
+  const response = await fetch(network.rpcUrls[0], {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({
+      jsonrpc: "2.0",
+      id: 1,
+      method: "eth_getBalance",
+      params: [address, "latest"],
+    }),
+  });
+  const payload = await response.json();
+  if (payload.error) throw new Error(payload.error.message || "RPC balance error");
+  return formatUnits(payload.result);
+}
+
+async function updateBalances() {
+  const from = NETWORKS[fromKey];
+  const to = NETWORKS[toKey];
+
+  if (!account) {
+    sellBalance.textContent = `Connect wallet to read ${from.label} balance.`;
+    buyBalance.textContent = `Connect wallet to read ${to.label} balance.`;
+    return;
+  }
+
+  sellBalance.textContent = `Loading ${from.short} balance...`;
+  buyBalance.textContent = `Loading ${to.short} balance...`;
+
+  const [fromResult, toResult] = await Promise.allSettled([
+    rpcBalance(from, account),
+    rpcBalance(to, account),
+  ]);
+
+  sellBalance.textContent =
+    fromResult.status === "fulfilled"
+      ? `Balance on ${from.label}: ${fromResult.value} ${from.token}`
+      : `Could not read ${from.label} balance.`;
+
+  buyBalance.textContent =
+    toResult.status === "fulfilled"
+      ? `Balance on ${to.label}: ${toResult.value} ${to.token}`
+      : `Could not read ${to.label} balance.`;
+}
+
 function setTokenButton(button, network, variant) {
   const coin = button.querySelector(".coin");
   const symbol = button.querySelector("strong");
@@ -143,10 +196,8 @@ function updateQuote() {
   routeStatus.className = route.available ? "available" : "soon";
   routeDetail.textContent = route.label;
   feeLabel.textContent = route.fee;
-  sellBalance.textContent = account
-    ? `Balance is read on ${from.label}. Same wallet can have different balance on each chain.`
-    : `Connect wallet to read ${from.label} balance.`;
-  buyBalance.textContent = `Destination balance lives on ${to.label}, separate from ${from.label}.`;
+  sellBalance.textContent = account ? sellBalance.textContent : `Connect wallet to read ${from.label} balance.`;
+  buyBalance.textContent = account ? buyBalance.textContent : `Connect wallet to read ${to.label} balance.`;
 
   fromChainLabel.textContent = from.short;
   toChainLabel.textContent = to.short;
@@ -154,6 +205,7 @@ function updateQuote() {
   setTokenButton(buyToken, to, toKey === "ritual" ? "ritual" : "eth");
   bridgeButton.textContent = account ? (route.available ? `Bridge from ${from.short}` : "Coming Soon") : "Connect Wallet";
   bridgeButton.disabled = Boolean(account && !route.available);
+  updateBalances();
 }
 
 function walletChainParams(network) {
