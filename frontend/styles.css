@@ -73,8 +73,59 @@ body.dark .nav-links a.active {
 }
 
 body.dark .network-option,
+body.dark .wallet-option,
+body.dark .token-option,
+body.dark .chain-option,
 body.dark .modal-head button {
   background: var(--surface-soft);
+  color: var(--text);
+}
+
+body.dark .network-option:hover,
+body.dark .wallet-option:hover,
+body.dark .token-option:hover,
+body.dark .chain-option:hover {
+  background: #2a3042;
+}
+
+body.dark .chain-option.active {
+  background: #353d55;
+}
+
+body.dark .token-option strong,
+body.dark .chain-option strong,
+body.dark .wallet-option strong,
+body.dark .network-option strong,
+body.dark .chain-option span,
+body.dark .token-option span {
+  color: var(--text);
+}
+
+body.dark .token-option small,
+body.dark .chain-option small,
+body.dark .wallet-option small,
+body.dark .network-option small {
+  color: #b8c0d4;
+}
+
+body.dark .chain-section {
+  color: #c4cbe0;
+}
+
+body.dark .chain-picker input,
+body.dark .token-picker input {
+  background: #252b3a;
+  color: var(--text);
+  border-color: #3b4359;
+}
+
+body.dark .chain-picker input::placeholder,
+body.dark .token-picker input::placeholder {
+  color: #9ca3b4;
+}
+
+body.dark .route-chip {
+  color: #9f7bff;
 }
 
 button,
