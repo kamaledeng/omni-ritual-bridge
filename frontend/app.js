@@ -588,6 +588,7 @@ function updateQuote() {
   setTokenButton(sellToken, from);
   setTokenButton(buyToken, to);
   setTokenButton(buyModeToken, to);
+  updateRecipientLabels();
   bridgeButton.textContent = activeAddress() ? (route.available ? `Bridge from ${from.short}` : "Coming Soon") : "Connect Wallet";
   bridgeButton.disabled = Boolean(activeAddress() && !route.available);
   updateBalances();
