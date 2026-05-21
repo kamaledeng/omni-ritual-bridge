@@ -113,6 +113,7 @@ const NETWORKS = {
 const connectButton = document.querySelector("#connect");
 const bridgeButton = document.querySelector("#bridgeButton");
 const themeToggle = document.querySelector("#themeToggle");
+const globalSearch = document.querySelector("#globalSearch");
 const form = document.querySelector("#bridge-form");
 const amountInput = document.querySelector("#amount");
 const receiveInput = document.querySelector("#receiveAmount");
@@ -620,6 +621,7 @@ buyWallet.addEventListener("click", openWalletModal);
 buyRecipient.addEventListener("click", openWalletModal);
 closeModal.addEventListener("click", closeTokenModal);
 closeWalletModal.addEventListener("click", closeWalletPicker);
+globalSearch.addEventListener("click", () => openTokenModal("to"));
 navSwap.addEventListener("click", (event) => {
   event.preventDefault();
   swapTab.click();
@@ -694,6 +696,14 @@ quickAmountButtons.forEach((button) => {
 themeToggle.addEventListener("click", () => {
   document.body.classList.toggle("dark");
   themeToggle.textContent = document.body.classList.contains("dark") ? "Light" : "Dark";
+});
+
+document.addEventListener("keydown", (event) => {
+  const tag = event.target?.tagName?.toLowerCase();
+  if (event.key === "/" && !["input", "textarea"].includes(tag)) {
+    event.preventDefault();
+    openTokenModal("to");
+  }
 });
 
 window.addEventListener("eip6963:announceProvider", (event) => {
