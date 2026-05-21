@@ -713,6 +713,57 @@ body.dark .buy-presets button {
   background: rgba(16, 24, 40, 0.28);
 }
 
+.recipient-menu {
+  position: fixed;
+  z-index: 20;
+  display: none;
+  min-width: 210px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 8px;
+  background: #ffffff;
+  box-shadow: 0 14px 40px rgba(16, 24, 40, 0.16);
+}
+
+body.dark .recipient-menu {
+  background: var(--surface);
+}
+
+.recipient-menu.open {
+  display: grid;
+  gap: 4px;
+}
+
+.recipient-menu button,
+.recipient-menu input {
+  width: 100%;
+  min-height: 42px;
+  border: 0;
+  border-radius: 6px;
+  padding: 0 10px;
+  background: transparent;
+  color: var(--text);
+  text-align: left;
+}
+
+.recipient-menu button:hover {
+  background: #f2f4f7;
+}
+
+body.dark .recipient-menu button:hover {
+  background: var(--surface-soft);
+}
+
+.recipient-menu input {
+  display: none;
+  border: 1px solid var(--line);
+  background: var(--surface-soft);
+}
+
+.recipient-menu.paste-mode input {
+  display: block;
+}
+
 .modal.open {
   display: grid;
 }

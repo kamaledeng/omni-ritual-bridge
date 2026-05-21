@@ -155,6 +155,10 @@ const closeRoutesModal = document.querySelector("#closeRoutesModal");
 const routeList = document.querySelector("#routeList");
 const buyModeToken = document.querySelector("#buyModeToken");
 const buyRecipient = document.querySelector("#buyRecipient");
+const recipientMenu = document.querySelector("#recipientMenu");
+const recipientConnect = document.querySelector("#recipientConnect");
+const recipientPaste = document.querySelector("#recipientPaste");
+const recipientInput = document.querySelector("#recipientInput");
 const buyUsdAmount = document.querySelector("#buyUsdAmount");
 const buyCryptoQuote = document.querySelector("#buyCryptoQuote");
 const trendButtons = [...document.querySelectorAll("[data-route]")];
@@ -170,6 +174,7 @@ let selectingSide = "from";
 let selectedChainFilter = "all";
 let selectedProvider = null;
 let selectedWalletType = "evm";
+let recipientAddress = "";
 const announcedProviders = [];
 let mode = "swap";
 let sourceBalance = 0;
@@ -229,6 +234,10 @@ function shortAddress(value) {
 
 function activeAddress() {
   return selectedWalletType === "solana" ? solanaAccount : account;
+}
+
+function activeRecipient() {
+  return recipientAddress || activeAddress();
 }
 
 function money(value) {
@@ -628,6 +637,7 @@ async function connectEvm(provider = selectedProvider || window.ethereum) {
   sellWallet.textContent = label || "Select wallet";
   buyWallet.textContent = label || "Select wallet";
   buyRecipient.textContent = label || "Select wallet";
+  if (!recipientAddress) recipientAddress = account;
   closeWalletPicker();
   updateQuote();
 }
@@ -648,6 +658,7 @@ async function connectSolana(provider = window.phantom?.solana || window.solana)
   sellWallet.textContent = label || "Select wallet";
   buyWallet.textContent = label || "Select wallet";
   buyRecipient.textContent = label || "Select wallet";
+  if (!recipientAddress) recipientAddress = solanaAccount;
   closeWalletPicker();
 
   if (fromKey !== "solana" && toKey !== "solana") {
@@ -672,6 +683,19 @@ function closeTokenModal() {
   tokenModal.setAttribute("aria-hidden", "true");
 }
 
+function openRecipientMenu(anchor) {
+  const rect = anchor.getBoundingClientRect();
+  recipientMenu.style.left = `${Math.max(12, rect.right - 210)}px`;
+  recipientMenu.style.top = `${rect.bottom + 8}px`;
+  recipientMenu.classList.add("open");
+  recipientMenu.setAttribute("aria-hidden", "false");
+}
+
+function closeRecipientMenu() {
+  recipientMenu.classList.remove("open", "paste-mode");
+  recipientMenu.setAttribute("aria-hidden", "true");
+}
+
 async function digestRequest(payload) {
   const encoded = new TextEncoder().encode(JSON.stringify(payload));
   const digest = await crypto.subtle.digest("SHA-256", encoded);
@@ -691,8 +715,33 @@ sellToken.addEventListener("click", () => openTokenModal("from"));
 buyToken.addEventListener("click", () => openTokenModal("to"));
 buyModeToken.addEventListener("click", () => openTokenModal("to"));
 sellWallet.addEventListener("click", openWalletModal);
-buyWallet.addEventListener("click", openWalletModal);
-buyRecipient.addEventListener("click", openWalletModal);
+buyWallet.addEventListener("click", (event) => openRecipientMenu(event.currentTarget));
+buyRecipient.addEventListener("click", (event) => openRecipientMenu(event.currentTarget));
+recipientConnect.addEventListener("click", () => {
+  closeRecipientMenu();
+  openWalletModal();
+});
+recipientPaste.addEventListener("click", () => {
+  recipientMenu.classList.add("paste-mode");
+  recipientInput.focus();
+});
+recipientInput.addEventListener("change", () => {
+  recipientAddress = recipientInput.value.trim();
+  const label = shortAddress(recipientAddress);
+  buyWallet.textContent = label || "Select wallet";
+  buyRecipient.textContent = label || "Select wallet";
+  closeRecipientMenu();
+});
+document.addEventListener("click", (event) => {
+  if (
+    recipientMenu.classList.contains("open") &&
+    !recipientMenu.contains(event.target) &&
+    event.target !== buyWallet &&
+    event.target !== buyRecipient
+  ) {
+    closeRecipientMenu();
+  }
+});
 closeModal.addEventListener("click", closeTokenModal);
 closeWalletModal.addEventListener("click", closeWalletPicker);
 globalSearch.addEventListener("click", () => openTokenModal("to"));
@@ -811,6 +860,7 @@ form.addEventListener("submit", async (event) => {
     amount: amountInput.value,
     receive: receiveInput.value,
     wallet: activeAddress(),
+    recipient: activeRecipient(),
     ritualChainId: 1979,
   };
   const requestHash = await digestRequest(request);
@@ -823,6 +873,7 @@ form.addEventListener("submit", async (event) => {
         <dt>Route</dt><dd>${request.from} -> ${request.to}</dd>
         <dt>Reason</dt><dd>This route needs bridge contracts, liquidity, or a relayer before it can execute.</dd>
         <dt>Wallet</dt><dd>${shortAddress(activeAddress())}</dd>
+        <dt>Recipient</dt><dd>${shortAddress(activeRecipient())}</dd>
         <dt>Request</dt><dd>${requestHash}</dd>
       </dl>
     `;
@@ -836,6 +887,7 @@ form.addEventListener("submit", async (event) => {
       <dt>Sell</dt><dd>${request.amount} ${request.sellToken}</dd>
       <dt>Buy</dt><dd>${request.receive} ${request.buyToken}</dd>
       <dt>Wallet</dt><dd>${shortAddress(activeAddress())}</dd>
+      <dt>Recipient</dt><dd>${shortAddress(activeRecipient())}</dd>
       <dt>Ritual</dt><dd>Testnet chain ID 1979</dd>
       <dt>Request</dt><dd>${requestHash}</dd>
     </dl>
