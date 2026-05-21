@@ -138,6 +138,11 @@ const tokenList = document.querySelector("#tokenList");
 const walletModal = document.querySelector("#walletModal");
 const closeWalletModal = document.querySelector("#closeWalletModal");
 const walletList = document.querySelector("#walletList");
+const navSwap = document.querySelector("#navSwap");
+const navRoutes = document.querySelector("#navRoutes");
+const routesModal = document.querySelector("#routesModal");
+const closeRoutesModal = document.querySelector("#closeRoutesModal");
+const routeList = document.querySelector("#routeList");
 const buyModeToken = document.querySelector("#buyModeToken");
 const buyRecipient = document.querySelector("#buyRecipient");
 const buyUsdAmount = document.querySelector("#buyUsdAmount");
@@ -389,6 +394,45 @@ function renderTokenModal() {
   });
 }
 
+function renderRoutes() {
+  const pairs = Object.entries(ROUTES);
+  routeList.innerHTML = "";
+
+  pairs.forEach(([pair, route]) => {
+    const [from, to] = pair.split(":");
+    const item = document.createElement("button");
+    item.type = "button";
+    item.className = "route-item";
+    item.innerHTML = `
+      <span>
+        <strong>${NETWORKS[from].label} -> ${NETWORKS[to].label}</strong>
+        <small>${route.label}</small>
+      </span>
+      <span class="route-chip">${route.available ? "Available" : "Coming soon"}</span>
+    `;
+    item.addEventListener("click", () => {
+      fromKey = from;
+      toKey = to;
+      amountInput.value = "0";
+      updateQuote();
+      closeRoutesPicker();
+      if (account) switchToNetwork(fromKey);
+    });
+    routeList.appendChild(item);
+  });
+}
+
+function openRoutesPicker() {
+  renderRoutes();
+  routesModal.classList.add("open");
+  routesModal.setAttribute("aria-hidden", "false");
+}
+
+function closeRoutesPicker() {
+  routesModal.classList.remove("open");
+  routesModal.setAttribute("aria-hidden", "true");
+}
+
 function chooseToken(token) {
   if (selectingSide === "from") {
     fromKey = token.chain;
@@ -533,6 +577,18 @@ buyWallet.addEventListener("click", openWalletModal);
 buyRecipient.addEventListener("click", openWalletModal);
 closeModal.addEventListener("click", closeTokenModal);
 closeWalletModal.addEventListener("click", closeWalletPicker);
+navSwap.addEventListener("click", (event) => {
+  event.preventDefault();
+  swapTab.click();
+});
+navRoutes.addEventListener("click", (event) => {
+  event.preventDefault();
+  openRoutesPicker();
+});
+closeRoutesModal.addEventListener("click", closeRoutesPicker);
+routesModal.addEventListener("click", (event) => {
+  if (event.target === routesModal) closeRoutesPicker();
+});
 allChainsButton.addEventListener("click", () => {
   selectedChainFilter = "all";
   renderTokenModal();

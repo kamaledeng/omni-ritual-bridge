@@ -791,6 +791,36 @@ body.dark .chain-picker {
   font-weight: 900;
 }
 
+.route-list {
+  display: grid;
+  gap: 8px;
+}
+
+.route-item {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 12px;
+  align-items: center;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 12px;
+  background: #ffffff;
+}
+
+body.dark .route-item {
+  background: var(--surface-soft);
+}
+
+.route-item strong,
+.route-item small {
+  display: block;
+}
+
+.route-item small {
+  color: var(--muted);
+  margin-top: 3px;
+}
+
 body.dark .route-chip {
   background: #252b42;
 }

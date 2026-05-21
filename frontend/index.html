@@ -18,8 +18,8 @@
       </a>
 
       <nav class="nav-links" aria-label="Primary">
-        <a class="active" href="#">Swap</a>
-        <a href="#">Routes</a>
+        <a class="active" href="#" id="navSwap">Swap</a>
+        <a href="#" id="navRoutes">Routes</a>
         <a href="https://explorer.ritualfoundation.org" target="_blank" rel="noreferrer">Transactions</a>
       </nav>
 
@@ -198,6 +198,16 @@
           <button type="button" id="closeWalletModal">Close</button>
         </div>
         <div id="walletList"></div>
+      </div>
+    </section>
+
+    <section class="modal" id="routesModal" aria-hidden="true">
+      <div class="modal-card wallet-modal-card">
+        <div class="modal-head">
+          <strong>Supported Routes</strong>
+          <button type="button" id="closeRoutesModal">Close</button>
+        </div>
+        <div class="route-list" id="routeList"></div>
       </div>
     </section>
 
