@@ -5,85 +5,109 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta
       name="description"
-      content="Ritual Intent Bridge verifies cross-chain bridge intents on Ritual testnet before execution."
+      content="Omni Ritual Bridge transfers testnet tokens across LayerZero-supported chains with Ritual verification."
     />
-    <title>Ritual Intent Bridge</title>
+    <title>Omni Ritual Bridge</title>
     <link rel="stylesheet" href="./styles.css" />
   </head>
   <body>
     <main class="shell">
-      <section class="hero">
-        <div>
-          <p class="eyebrow">LayerZero OFT + Ritual verification</p>
-          <h1>Omni Ritual Bridge</h1>
-          <p class="lead">
-            Bridge tokens across supported testnets, with Ritual recording the intent and verification trail.
-          </p>
-        </div>
-        <div class="status-panel">
-          <span class="pulse"></span>
-          <div>
-            <strong>Ritual Chain</strong>
-            <span>Chain ID 1979 - AI verification layer</span>
-          </div>
-        </div>
-      </section>
+      <nav class="nav">
+        <strong>Omni Ritual Bridge</strong>
+        <button type="button" id="connect">Connect Wallet</button>
+      </nav>
 
-      <section class="workspace">
-        <form id="intent-form" class="composer">
-          <div class="toolbar">
-            <button type="button" id="connect">Connect</button>
-            <button type="button" id="add-chain" title="Add Ritual testnet">+</button>
+      <section class="layout">
+        <section class="bridge-card">
+          <div class="card-head">
+            <div>
+              <p class="eyebrow">Testnet bridge</p>
+              <h1>Bridge</h1>
+            </div>
+            <span class="network-pill">LayerZero OFT</span>
           </div>
 
-          <label>
-            Source chain ID / EID
-            <input id="srcChain" type="number" value="84532" min="1" />
-          </label>
+          <form id="bridge-form">
+            <div class="chain-grid">
+              <label class="field">
+                <span>From</span>
+                <select id="fromChain">
+                  <option value="baseSepolia">Base Sepolia</option>
+                  <option value="sepolia">Ethereum Sepolia</option>
+                  <option value="optimismSepolia">Optimism Sepolia</option>
+                </select>
+              </label>
 
-          <label>
-            Destination chain ID / EID
-            <input id="dstChain" type="number" value="11155111" min="1" />
-          </label>
+              <button type="button" id="swapChains" class="swap" title="Swap chains">&lt;&gt;</button>
 
-          <label>
-            Token address
-            <input id="token" value="0x0000000000000000000000000000000000000000" />
-          </label>
+              <label class="field">
+                <span>To</span>
+                <select id="toChain">
+                  <option value="sepolia">Ethereum Sepolia</option>
+                  <option value="baseSepolia">Base Sepolia</option>
+                  <option value="optimismSepolia">Optimism Sepolia</option>
+                </select>
+              </label>
+            </div>
 
-          <label>
-            Recipient
-            <input id="recipient" placeholder="0x..." />
-          </label>
+            <section class="amount-box">
+              <div class="amount-top">
+                <span>Amount</span>
+                <button type="button" id="maxAmount">MAX</button>
+              </div>
+              <div class="amount-row">
+                <input id="amount" type="number" value="10" min="0" step="0.0001" />
+                <select id="token">
+                  <option value="ORIT">ORIT</option>
+                </select>
+              </div>
+              <small>Balance: demo mode</small>
+            </section>
 
-          <label>
-            Amount
-            <input id="amount" type="number" value="10" min="0" step="0.0001" />
-          </label>
+            <label class="field">
+              <span>Recipient</span>
+              <input id="recipient" placeholder="0x..." />
+            </label>
 
-          <label>
-            Intent instruction
-            <textarea id="instruction">Bridge from Base Sepolia to Ethereum Sepolia only if route is safe, cost is reasonable, and recipient matches my wallet.</textarea>
-          </label>
+            <section class="route-box">
+              <div>
+                <span>Route</span>
+                <strong id="routeLabel">Base Sepolia -> Ethereum Sepolia</strong>
+              </div>
+              <div>
+                <span>Estimated fee</span>
+                <strong id="feeLabel">~0.002 ETH</strong>
+              </div>
+              <div>
+                <span>Receive</span>
+                <strong id="receiveLabel">10 ORIT</strong>
+              </div>
+            </section>
 
-          <button class="primary" type="submit">Generate Intent</button>
-        </form>
-
-        <section class="verdict">
-          <div class="verdict-head">
-            <p class="eyebrow">AI policy verdict</p>
-            <strong id="verdict-label">READY</strong>
-          </div>
-          <div id="intent-card" class="intent-card">
-            <span>No intent generated yet.</span>
-          </div>
-          <div class="timeline">
-            <div class="step active">Intent</div>
-            <div class="step">Ritual Log</div>
-            <div class="step">LayerZero OFT</div>
-            <div class="step">Claim</div>
-          </div>
+            <button class="primary" type="submit">Bridge</button>
+          </form>
         </section>
+
+        <aside class="side-panel">
+          <div class="status-card">
+            <p class="eyebrow">Ritual verification</p>
+            <strong id="verdict-label">READY</strong>
+            <p id="verdict-copy">
+              Ritual stores the bridge intent and verification trail. The token transfer itself uses LayerZero OFT.
+            </p>
+          </div>
+
+          <div id="tx-card" class="tx-card">
+            <span>No bridge request yet.</span>
+          </div>
+
+          <div class="timeline">
+            <div class="step active">Quote</div>
+            <div class="step">Approve</div>
+            <div class="step">Bridge</div>
+            <div class="step">Receive</div>
+          </div>
+        </aside>
       </section>
     </main>
 
