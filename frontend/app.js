@@ -350,7 +350,11 @@ function evmProviders() {
   list.push(...announcedProviders.map((entry) => entry.provider));
   if (window.ethereum?.providers) list.push(...window.ethereum.providers);
   if (window.ethereum) list.push(window.ethereum);
-  return [...new Map(list.map((provider) => [providerName(provider), provider])).values()];
+  const named = [...new Map(list.map((provider) => [providerName(provider), provider])).entries()];
+  const hasSpecificWallet = named.some(([name]) => name !== "Injected Wallet");
+  return named
+    .filter(([name]) => !(hasSpecificWallet && name === "Injected Wallet"))
+    .map(([, provider]) => provider);
 }
 
 function solanaProviders() {
@@ -380,7 +384,14 @@ function renderWallets() {
       <span class="coin ritual">W</span>
       <span><strong>${providerName(provider)}</strong><small>Connect EVM wallet</small></span>
     `;
-    button.addEventListener("click", () => connectEvm(provider));
+    button.addEventListener("click", async () => {
+      button.querySelector("small").textContent = "Opening wallet...";
+      try {
+        await connectEvm(provider);
+      } catch (error) {
+        button.querySelector("small").textContent = error?.code === 4001 ? "Connection rejected" : "Could not connect";
+      }
+    });
     walletList.appendChild(button);
   });
 
@@ -392,7 +403,14 @@ function renderWallets() {
       <span class="coin sol">SOL</span>
       <span><strong>${name}</strong><small>Connect Solana wallet</small></span>
     `;
-    button.addEventListener("click", () => connectSolana(provider));
+    button.addEventListener("click", async () => {
+      button.querySelector("small").textContent = "Opening Phantom...";
+      try {
+        await connectSolana(provider);
+      } catch {
+        button.querySelector("small").textContent = "Could not connect";
+      }
+    });
     walletList.appendChild(button);
   });
 }
