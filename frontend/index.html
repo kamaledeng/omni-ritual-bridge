@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Ritual Intent Bridge</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <section class="hero">
+        <div>
+          <p class="eyebrow">Ritual testnet bridge concept</p>
+          <h1>Ritual Intent Bridge</h1>
+          <p class="lead">
+            Cross-chain intents verified by Ritual before bridge execution.
+          </p>
+        </div>
+        <div class="status-panel">
+          <span class="pulse"></span>
+          <div>
+            <strong>Ritual Chain</strong>
+            <span>Chain ID 1979 - AI verification layer</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="workspace">
+        <form id="intent-form" class="composer">
+          <div class="toolbar">
+            <button type="button" id="connect">Connect</button>
+            <button type="button" id="add-chain" title="Add Ritual testnet">+</button>
+          </div>
+
+          <label>
+            Source chain ID
+            <input id="srcChain" type="number" value="84532" min="1" />
+          </label>
+
+          <label>
+            Destination chain ID
+            <input id="dstChain" type="number" value="1979" min="1" />
+          </label>
+
+          <label>
+            Token address
+            <input id="token" value="0x0000000000000000000000000000000000000000" />
+          </label>
+
+          <label>
+            Recipient
+            <input id="recipient" placeholder="0x..." />
+          </label>
+
+          <label>
+            Amount
+            <input id="amount" type="number" value="10" min="0" step="0.0001" />
+          </label>
+
+          <label>
+            Intent instruction
+            <textarea id="instruction">Bridge only if route is safe, cost is reasonable, and recipient matches my wallet.</textarea>
+          </label>
+
+          <button class="primary" type="submit">Generate Intent</button>
+        </form>
+
+        <section class="verdict">
+          <div class="verdict-head">
+            <p class="eyebrow">AI policy verdict</p>
+            <strong id="verdict-label">READY</strong>
+          </div>
+          <div id="intent-card" class="intent-card">
+            <span>No intent generated yet.</span>
+          </div>
+          <div class="timeline">
+            <div class="step active">Intent</div>
+            <div class="step">Ritual Verify</div>
+            <div class="step">LayerZero Send</div>
+            <div class="step">Claim</div>
+          </div>
+        </section>
+      </section>
+    </main>
+
+    <script src="./app.js"></script>
+  </body>
+</html>
