@@ -175,6 +175,7 @@ let selectedChainFilter = "all";
 let selectedProvider = null;
 let selectedWalletType = "evm";
 let recipientAddress = "";
+let recipientMode = "same";
 const announcedProviders = [];
 let mode = "swap";
 let sourceBalance = 0;
@@ -238,6 +239,18 @@ function activeAddress() {
 
 function activeRecipient() {
   return recipientAddress || activeAddress();
+}
+
+function recipientLabel() {
+  if (recipientMode === "same" && activeAddress()) return "Same wallet";
+  if (recipientAddress) return shortAddress(recipientAddress);
+  return "Select recipient";
+}
+
+function updateRecipientLabels() {
+  const label = recipientLabel();
+  buyWallet.textContent = label;
+  buyRecipient.textContent = label;
 }
 
 function money(value) {
@@ -635,9 +648,7 @@ async function connectEvm(provider = selectedProvider || window.ethereum) {
 
   connectButton.textContent = label || "Connect";
   sellWallet.textContent = label || "Select wallet";
-  buyWallet.textContent = label || "Select wallet";
-  buyRecipient.textContent = label || "Select wallet";
-  if (!recipientAddress) recipientAddress = account;
+  updateRecipientLabels();
   closeWalletPicker();
   updateQuote();
 }
@@ -656,9 +667,7 @@ async function connectSolana(provider = window.phantom?.solana || window.solana)
   const label = shortAddress(solanaAccount);
   connectButton.textContent = label || "Connect";
   sellWallet.textContent = label || "Select wallet";
-  buyWallet.textContent = label || "Select wallet";
-  buyRecipient.textContent = label || "Select wallet";
-  if (!recipientAddress) recipientAddress = solanaAccount;
+  updateRecipientLabels();
   closeWalletPicker();
 
   if (fromKey !== "solana" && toKey !== "solana") {
@@ -718,6 +727,7 @@ sellWallet.addEventListener("click", openWalletModal);
 buyWallet.addEventListener("click", (event) => openRecipientMenu(event.currentTarget));
 buyRecipient.addEventListener("click", (event) => openRecipientMenu(event.currentTarget));
 recipientConnect.addEventListener("click", () => {
+  recipientMode = "custom";
   closeRecipientMenu();
   openWalletModal();
 });
@@ -727,9 +737,8 @@ recipientPaste.addEventListener("click", () => {
 });
 recipientInput.addEventListener("change", () => {
   recipientAddress = recipientInput.value.trim();
-  const label = shortAddress(recipientAddress);
-  buyWallet.textContent = label || "Select wallet";
-  buyRecipient.textContent = label || "Select wallet";
+  recipientMode = "custom";
+  updateRecipientLabels();
   closeRecipientMenu();
 });
 document.addEventListener("click", (event) => {
