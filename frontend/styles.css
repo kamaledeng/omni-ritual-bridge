@@ -400,14 +400,50 @@ kbd {
   border-radius: 50%;
   color: #ffffff;
   font-weight: 950;
+  font-size: 11px;
+  letter-spacing: 0;
 }
 
 .coin.eth {
-  background: var(--blue);
+  background: linear-gradient(145deg, #627eea, #3f5fd4);
+}
+
+.coin.base {
+  background: #0052ff;
 }
 
 .coin.ritual {
-  background: var(--purple);
+  background: linear-gradient(145deg, #6f3cff, #5417d7);
+}
+
+.coin.orit {
+  background: linear-gradient(145deg, #39d98a, #5417d7);
+}
+
+.coin.usdc {
+  background: #2775ca;
+  font-size: 18px;
+}
+
+.coin.bnb {
+  background: #f3ba2f;
+  color: #111827;
+}
+
+.coin.sol {
+  background: linear-gradient(145deg, #14f195, #9945ff 52%, #00c2ff);
+}
+
+.coin.polygon {
+  background: #8247e5;
+}
+
+.coin.op {
+  background: #ff0420;
+}
+
+.coin.arb {
+  background: #213147;
 }
 
 .asset-foot {

@@ -4,6 +4,7 @@ const NETWORKS = {
     short: "Ethereum",
     token: "ETH",
     coin: "E",
+    logo: "eth",
     chainId: 1,
     hexChainId: "0x1",
     eid: 30101,
@@ -15,6 +16,7 @@ const NETWORKS = {
     short: "Base",
     token: "ETH",
     coin: "E",
+    logo: "base",
     chainId: 84532,
     hexChainId: "0x14a34",
     eid: 40245,
@@ -26,6 +28,7 @@ const NETWORKS = {
     short: "Ritual",
     token: "RITUAL",
     coin: "R",
+    logo: "ritual",
     chainId: 1979,
     hexChainId: "0x7bb",
     eid: null,
@@ -37,6 +40,7 @@ const NETWORKS = {
     short: "Sepolia",
     token: "ETH",
     coin: "E",
+    logo: "eth",
     chainId: 11155111,
     hexChainId: "0xaa36a7",
     eid: 40161,
@@ -48,6 +52,7 @@ const NETWORKS = {
     short: "Optimism",
     token: "ETH",
     coin: "O",
+    logo: "op",
     chainId: 10,
     hexChainId: "0xa",
     eid: 30111,
@@ -59,6 +64,7 @@ const NETWORKS = {
     short: "Arbitrum",
     token: "ETH",
     coin: "A",
+    logo: "arb",
     chainId: 42161,
     hexChainId: "0xa4b1",
     eid: 30110,
@@ -70,6 +76,7 @@ const NETWORKS = {
     short: "Polygon",
     token: "POL",
     coin: "P",
+    logo: "polygon",
     chainId: 137,
     hexChainId: "0x89",
     eid: 30109,
@@ -81,6 +88,7 @@ const NETWORKS = {
     short: "BNB",
     token: "BNB",
     coin: "B",
+    logo: "bnb",
     chainId: 56,
     hexChainId: "0x38",
     eid: 30102,
@@ -92,6 +100,7 @@ const NETWORKS = {
     short: "Solana",
     token: "SOL",
     coin: "S",
+    logo: "sol",
     chainId: null,
     hexChainId: null,
     eid: null,
@@ -163,18 +172,18 @@ let mode = "swap";
 let sourceBalance = 0;
 
 const TOKENS = [
-  { symbol: "ETH", name: "Ether", chain: "ethereum", address: "0x0000...0000", volume: "High" },
-  { symbol: "ETH", name: "Ether", chain: "base", address: "0x0000...0000", volume: "High" },
-  { symbol: "RITUAL", name: "Ritual Testnet", chain: "ritual", address: "native", volume: "Testnet" },
-  { symbol: "ORIT", name: "Omni Ritual", chain: "ritual", address: "coming soon", volume: "Coming soon" },
-  { symbol: "USDC", name: "USD Coin", chain: "ethereum", address: "0xa0...eb48", volume: "High" },
-  { symbol: "USDC", name: "USD Coin", chain: "base", address: "0x83...2913", volume: "High" },
-  { symbol: "ETH", name: "Ether", chain: "sepolia", address: "0x0000...0000", volume: "Testnet" },
-  { symbol: "ETH", name: "Ether", chain: "optimism", address: "0x0000...0000", volume: "High" },
-  { symbol: "ETH", name: "Ether", chain: "arbitrum", address: "0x0000...0000", volume: "High" },
-  { symbol: "POL", name: "Polygon", chain: "polygon", address: "native", volume: "High" },
-  { symbol: "BNB", name: "BNB", chain: "bnb", address: "native", volume: "High" },
-  { symbol: "SOL", name: "Solana", chain: "solana", address: "native", volume: "Display only" },
+  { symbol: "ETH", name: "Ether", chain: "ethereum", address: "0x0000...0000", volume: "High", logo: "eth" },
+  { symbol: "ETH", name: "Ether", chain: "base", address: "0x0000...0000", volume: "High", logo: "eth" },
+  { symbol: "RITUAL", name: "Ritual Testnet", chain: "ritual", address: "native", volume: "Testnet", logo: "ritual" },
+  { symbol: "ORIT", name: "Omni Ritual", chain: "ritual", address: "coming soon", volume: "Coming soon", logo: "orit" },
+  { symbol: "USDC", name: "USD Coin", chain: "ethereum", address: "0xa0...eb48", volume: "High", logo: "usdc" },
+  { symbol: "USDC", name: "USD Coin", chain: "base", address: "0x83...2913", volume: "High", logo: "usdc" },
+  { symbol: "ETH", name: "Ether", chain: "sepolia", address: "0x0000...0000", volume: "Testnet", logo: "eth" },
+  { symbol: "ETH", name: "Ether", chain: "optimism", address: "0x0000...0000", volume: "High", logo: "eth" },
+  { symbol: "ETH", name: "Ether", chain: "arbitrum", address: "0x0000...0000", volume: "High", logo: "eth" },
+  { symbol: "POL", name: "Polygon", chain: "polygon", address: "native", volume: "High", logo: "polygon" },
+  { symbol: "BNB", name: "BNB", chain: "bnb", address: "native", volume: "High", logo: "bnb" },
+  { symbol: "SOL", name: "Solana", chain: "solana", address: "native", volume: "Display only", logo: "sol" },
 ];
 
 const ROUTES = {
@@ -276,13 +285,38 @@ async function updateBalances() {
       : `Could not read ${to.label} balance.`;
 }
 
-function setTokenButton(button, network, variant) {
+function tokenLogo(symbol, fallback) {
+  const key = symbol.toLowerCase();
+  return {
+    eth: { text: "ETH", className: "eth" },
+    ritual: { text: "RIT", className: "ritual" },
+    orit: { text: "OR", className: "orit" },
+    usdc: { text: "$", className: "usdc" },
+    pol: { text: "POL", className: "polygon" },
+    bnb: { text: "BNB", className: "bnb" },
+    sol: { text: "SOL", className: "sol" },
+  }[key] || { text: fallback.coin, className: fallback.logo || "eth" };
+}
+
+function chainLogo(network) {
+  return {
+    text: network.coin,
+    className: network.logo || "eth",
+  };
+}
+
+function setCoin(element, logo) {
+  element.textContent = logo.text;
+  element.className = `coin ${logo.className}`;
+}
+
+function setTokenButton(button, network) {
   const coin = button.querySelector(".coin");
   const symbol = button.querySelector("strong");
   const chain = button.querySelector("small");
+  const logo = tokenLogo(network.token, network);
 
-  coin.textContent = network.coin;
-  coin.className = `coin ${variant}`;
+  setCoin(coin, logo);
   symbol.textContent = network.token;
   chain.textContent = network.short;
 }
@@ -348,7 +382,8 @@ function renderChainButtons() {
     button.type = "button";
     button.className = `chain-option ${selectedChainFilter === key ? "active" : ""}`;
     button.dataset.chain = key;
-    button.innerHTML = `<span class="coin ${key === "ritual" ? "ritual" : "eth"}">${network.coin}</span><span>${network.label}</span>`;
+    const logo = chainLogo(network);
+    button.innerHTML = `<span class="coin ${logo.className}">${logo.text}</span><span>${network.label}</span>`;
     button.addEventListener("click", () => {
       selectedChainFilter = key;
       renderTokenModal();
@@ -381,11 +416,12 @@ function renderTokenModal() {
   tokenList.innerHTML = "";
   tokens.forEach((token) => {
     const network = NETWORKS[token.chain];
+    const logo = tokenLogo(token.logo || token.symbol, network);
     const button = document.createElement("button");
     button.type = "button";
     button.className = "token-option";
     button.innerHTML = `
-      <span class="coin ${token.chain === "ritual" ? "ritual" : "eth"}">${network.coin}</span>
+      <span class="coin ${logo.className}">${logo.text}</span>
       <span><strong>${token.symbol}</strong><small>${network.label} ${token.address}</small></span>
       <span class="route-chip">${token.volume}</span>
     `;
@@ -472,9 +508,9 @@ function updateQuote() {
 
   fromChainLabel.textContent = from.short;
   toChainLabel.textContent = to.short;
-  setTokenButton(sellToken, from, fromKey === "ritual" ? "ritual" : "eth");
-  setTokenButton(buyToken, to, toKey === "ritual" ? "ritual" : "eth");
-  setTokenButton(buyModeToken, to, toKey === "ritual" ? "ritual" : "eth");
+  setTokenButton(sellToken, from);
+  setTokenButton(buyToken, to);
+  setTokenButton(buyModeToken, to);
   bridgeButton.textContent = account ? (route.available ? `Bridge from ${from.short}` : "Coming Soon") : "Connect Wallet";
   bridgeButton.disabled = Boolean(account && !route.available);
   updateBalances();
